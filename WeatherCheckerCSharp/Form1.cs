@@ -19,6 +19,7 @@ namespace WeatherCheckerCSharp
         // HTTPクライアントを使用するとGetStringAsyncが使えて，渡されたデータ（ＪＳＯＮ）を文字列として受け取ることができる
         // Webにアクセスするためのインスタンス
         private static readonly HttpClient http = new HttpClient();
+        // クリック系は戻り値voidでOK。それ以外はTaskらしい。（なぜ？）
         private async void btnSearch_Click(object sender, EventArgs e)
         {
 

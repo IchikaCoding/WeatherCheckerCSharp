@@ -36,7 +36,7 @@
             // 
             // txtCity
             // 
-            txtCity.Location = new Point(52, 77);
+            txtCity.Location = new Point(90, 82);
             txtCity.Name = "txtCity";
             txtCity.Size = new Size(100, 23);
             txtCity.TabIndex = 0;
