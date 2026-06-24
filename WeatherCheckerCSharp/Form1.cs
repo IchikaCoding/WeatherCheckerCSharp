@@ -1,3 +1,7 @@
+using System.Text.Json;
+using WeatherCheckerCSharp;
+using static System.Net.WebRequestMethods;
+
 namespace WeatherCheckerCSharp
 {
     public partial class Form1 : Form
@@ -42,6 +46,35 @@ namespace WeatherCheckerCSharp
 
             // WebからもらってきたデータをtxtRawのテキスト欄に入れる
             txtRaw.Text = geoJson;
+
+            // 1段目：座標を取り出す
+            // APIから取得したJSON文字列をデシリアライズしてrecordの型に入ったgeoを作る
+            var geo = JsonSerializer.Deserialize<GeoResponse>(geoJson);
+            // geoがあるなら、Resultsプロパティを見て、それがあるなら、LINQで一致した最初の値だけ取得
+            GeoResult? hit = geo?.Results?.FirstOrDefault();
+            // hitがnullなら、受け取ったデータには存在しなかった。見つからなかったよを表示する
+            if (hit is null) { lblStatus.Text = $"「{city}」が見つかりません"; return; }
+
+            // 2段目：予報を取る（3日分）forecast_days=3で指定
+            // JSON文字列をrecord型に入れた。それのPropertyを使用してアクセスするためのリンクを作成
+            // Tokyoとか取得したいデータは固定になってしまう気がする。。。
+            string fcUrl =
+                $"https://api.open-meteo.com/v1/forecast" +
+                $"?latitude={hit.Latitude}&longitude={hit.Longitude}" +
+                "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
+                "&timezone=Asia%2FTokyo&forecast_days=3";
+
+            // また作成したURLでJSONを取得
+            string fcJson = await http.GetStringAsync(fcUrl);
+            // JSON文字列をrecordのForecastResponse型に変換。
+            // recordってインスタンス的なもの？変換したらそこにデータが代入されるって感じ
+            // ForecastResponse型がforecastだから、これのプロパティにDailyあり
+            var forecast = JsonSerializer.Deserialize<ForecastResponse>(fcJson);
+
+            // !はなに？
+            // DailyからTempMaxとかにアクセスする（？）ナニコレ？
+            DailyData d = forecast!.Daily;
+            lblStatus.Text = $"{hit.Name}：今日の最高 {d.TempMax[0]}℃ / 最低 {d.TempMin[0]}℃";
         }
 
         // これどこで使うメソッド？JSONだからクラスに直すのでは？
@@ -49,5 +82,8 @@ namespace WeatherCheckerCSharp
         {
             Console.WriteLine();
         }
-    }
-}
+
+       
+        
+       }   
+   }
