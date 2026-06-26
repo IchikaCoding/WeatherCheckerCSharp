@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+// これは何に使っていますか？↓
 using System.Text.Json.Serialization;
 namespace WeatherCheckerCSharp;
 
@@ -8,31 +9,36 @@ namespace WeatherCheckerCSharp;
 // 理由は、JSONで受け取ったデータを加工するため（？）
 
 
-// GeoResponseの引数みたいになっている？
-// JSONのresultsをC# のResultsのプロパティに一致させる
-// Resultsの型がList。GeoResultはListの要素の型。このListがnullの可能性もある
-// GeoResponseはrecord名？Resultsはプロパティ名？
-public record GeoResponse(
-    [property: JsonPropertyName("results")] List<GeoResult>? Results);
 
-// Name、Latitude、Longitude
+
+// ここにJSON
+// 緯度経度もらってくるやつ
+// 一つの要素
+// 型名とプロパティ名
 public record GeoResult(
-     [property: JsonPropertyName("name")] string Name,
-     [property: JsonPropertyName("latitude")] double Latitude,
-     [property: JsonPropertyName("longitude")] double Longitude);
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("latitude")] double Latitude,
+    [property: JsonPropertyName("longitude")] double Longitude
+    );
 
-// これはどんなJSONのデータなのでしょうか？
-public record ForecastResponse(
-    [property: JsonPropertyName("daily")] DailyData Daily);
+// 結果一覧（リスト）
+public record GeoResponse(
+    [property: JsonPropertyName("results")]  List<GeoResult> Results
+    );
 
-// item, WeatherCode, temperature_2m_max,temperature_2m_min
-// precipitation_probability_max
+// 天気予報はここから　
 public record DailyData(
-    [property: JsonPropertyName("item")] List<string> Item,
+    // もしかして、日付じゃなくて文字列？
+    [property: JsonPropertyName("time")] List<string> Time,
     [property: JsonPropertyName("weather_code")] List<int> WeatherCode,
-    // TempMaxはどうしてdouble型にしてあるの？最大気温ならintで良くない？元のJSONの型が
     [property: JsonPropertyName("temperature_2m_max")] List<double> TempMax,
     [property: JsonPropertyName("temperature_2m_min")] List<double> TempMin,
-    // どうしてintなの?降水確率なら整数じゃなくない？doubleっぽくない？
-    [property: JsonPropertyName("precipitation_probability_max")] List<int> PrecipProb
+    // 変数名長すぎた
+    [property: JsonPropertyName("precipitation_probability_max")] List<int> PrecipitationProbabilityMax
+    );
+
+// 天気予報一覧はこれ。List
+// 天気予報の一覧ってなんだろう、
+public record ForecastResponse(
+    [property: JsonPropertyName("daily")] DailyData Daily
     );
