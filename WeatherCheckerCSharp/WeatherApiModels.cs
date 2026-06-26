@@ -34,7 +34,7 @@ public record DailyData(
     [property: JsonPropertyName("temperature_2m_max")] List<double> TempMax,
     [property: JsonPropertyName("temperature_2m_min")] List<double> TempMin,
     // 変数名長すぎた
-    [property: JsonPropertyName("precipitation_probability_max")] List<int> PrecipitationProbabilityMax
+    [property: JsonPropertyName("precipitation_probability_max")] List<int> PrecipProb
     );
 
 // 天気予報一覧はこれ。List

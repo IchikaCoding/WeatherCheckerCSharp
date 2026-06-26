@@ -51,6 +51,7 @@ namespace WeatherCheckerCSharp
             // APIから取得したJSON文字列をデシリアライズしてrecordの型に入ったgeoを作る
             var geo = JsonSerializer.Deserialize<GeoResponse>(geoJson);
             // geoがあるなら、Resultsプロパティを見て、それがあるなら、LINQで一致した最初の値だけ取得
+            // これってnullも受け付けるってこと？
             GeoResult? hit = geo?.Results?.FirstOrDefault();
             // hitがnullなら、受け取ったデータには存在しなかった。見つからなかったよを表示する
             if (hit is null) { lblStatus.Text = $"「{city}」が見つかりません"; return; }
@@ -73,6 +74,8 @@ namespace WeatherCheckerCSharp
 
             // !はなに？
             // DailyからTempMaxとかにアクセスする（？）ナニコレ？
+            // hit自体がGeoResultだからそれぞれのPropertyにアクセスできる
+            // この表示をするためにJSONからrecordにデシリアライズした
             DailyData d = forecast!.Daily;
             lblStatus.Text = $"{hit.Name}：今日の最高 {d.TempMax[0]}℃ / 最低 {d.TempMin[0]}℃";
         }
@@ -83,7 +86,7 @@ namespace WeatherCheckerCSharp
             Console.WriteLine();
         }
 
-       
-        
-       }   
+
+
+    }   
    }
