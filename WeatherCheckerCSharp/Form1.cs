@@ -1,3 +1,4 @@
+using System.Security.Policy;
 using System.Text.Json;
 using WeatherCheckerCSharp;
 using static System.Net.WebRequestMethods;
@@ -27,57 +28,51 @@ namespace WeatherCheckerCSharp
         // クリック系は戻り値voidでOK。それ以外はTaskらしい。イベントハンドラは非同期処理でもvoid
         private async void btnSearch_Click(object sender, EventArgs e)
         {
+            // JSON文字列がない、、、
+            string cityName = txtCity.Text;
+            cityName.Trim();
+            // GeoResponseを受ける
+            // URLで都市名で検索する
+            // URLの作り方がわからない。非同期処理がGood
+            string url = "https://geocoding-api.open-meteo.com/v1/search/&?name={cityName}&?count=1&language=ja&format=json";
+            // EscapeDataStringでURLを安全な文字列に修正してくれうらしんだけど、間違っているかも、、、、
+            string geoJson = await http.GetStringAsync(EscapeDataString(url));
 
-            // 入力されたテキストから前後から空白文字をすべて削除
-            string city = txtCity.Text.Trim();
-            // 都市名 → 緯度経度（日本語で検索、上位1件）
-            // EscapeDataString()でなにをしているの？
-            string geoUrl = $"https://geocoding-api.open-meteo.com/v1/search" +
-        $"?name={Uri.EscapeDataString(city)}&count=1&language=ja&format=json";
-            // ラベルにURLをいれる
-            lblStatus.Text = geoUrl;
-
-            // Webに対して，URLのデータを文字列でほしいです。
-            // 時間がかかったら終わるまで待って、結果をgeoJsonに入れる
-            // 👉ここで結果を待つ。でも待っている間、画面全体は止めない。
-            // これってどうして画面が止まらないのですか？
-            // 👉️await がスレッドを解放しているかららしい（？）
-            string geoJson = await http.GetStringAsync(geoUrl);
-
-            // WebからもらってきたデータをtxtRawのテキスト欄に入れる
+            // 都市名が見つからなかった場合はここで早期リターン
+            if(geoJson is null)
+            {
+                lblStatus.Text =$"「{cityName}」が見つかりません";
+                return;
+            }
             txtRaw.Text = geoJson;
 
-            // 1段目：座標を取り出す
-            // APIから取得したJSON文字列をデシリアライズしてrecordの型に入ったgeoを作る
-            var geo = JsonSerializer.Deserialize<GeoResponse>(geoJson);
-            // geoがあるなら、Resultsプロパティを見て、それがあるなら、LINQで一致した最初の値だけ取得
-            // これってnullも受け付けるってこと？
-            GeoResult? hit = geo?.Results?.FirstOrDefault();
-            // hitがnullなら、受け取ったデータには存在しなかった。見つからなかったよを表示する
-            if (hit is null) { lblStatus.Text = $"「{city}」が見つかりません"; return; }
+           // デシリアライズするとrecordの型にはめる事が可能（？）
+            GeoResponse? geoString = JsonSerializer.Deserialize<GeoResponse>(geoJson);
 
-            // 2段目：予報を取る（3日分）forecast_days=3で指定
-            // JSON文字列をrecord型に入れた。それのPropertyを使用してアクセスするためのリンクを作成
-            // Tokyoとか取得したいデータは固定になってしまう気がする。。。
-            string fcUrl =
-                $"https://api.open-meteo.com/v1/forecast" +
-                $"?latitude={hit.Latitude}&longitude={hit.Longitude}" +
-                "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
-                "&timezone=Asia%2FTokyo&forecast_days=3";
+            // 緯度経度を取得する
+            List<GeoResult> geoResults = geoString.Results;
+            GeoResult geoFirstItem = geoResults[1];
+            double latitude = geoFirstItem.Latitude;
+            double longitude = geoFirstItem.Longitude;
+            
+            // 3日分取得
+            string forecastUrl = $"https://api.open-meteo.com/v1/forecast/?latitude={latitude}/?longitude={longitude}/?daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,timezone=Asia%2FTokyo,forecast_days=3";
+            string forecastJson = await http.GetStringAsync(forecastUrl);
+            // ForecastResponse型のデータにする
+            ForecastResponse? forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson);
+            DailyData dailyData = forecastResponse.Daily;
+            List<double> tempMaxList =  dailyData.TempMax;
+             List<double> tempMinList =  dailyData.TempMin;
 
-            // また作成したURLでJSONを取得
-            string fcJson = await http.GetStringAsync(fcUrl);
-            // JSON文字列をrecordのForecastResponse型に変換。
-            // recordってインスタンス的なもの？変換したらそこにデータが代入されるって感じ
-            // ForecastResponse型がforecastだから、これのプロパティにDailyあり
-            var forecast = JsonSerializer.Deserialize<ForecastResponse>(fcJson);
 
-            // !はなに？
-            // DailyからTempMaxとかにアクセスする（？）ナニコレ？
-            // hit自体がGeoResultだからそれぞれのPropertyにアクセスできる
-            // この表示をするためにJSONからrecordにデシリアライズした
-            DailyData d = forecast!.Daily;
-            lblStatus.Text = $"{hit.Name}：今日の最高 {d.TempMax[0]}℃ / 最低 {d.TempMin[0]}℃";
+            // 最高気温。1日目：15℃, 2日目：10℃
+            lblStatus.Text = $"{cityName}：今日の最高 {tempMaxList[0]}℃ / 最低 {tempMinList[0]}℃";
+
+            }
+
+        private string? EscapeDataString(string url)
+        {
+            throw new NotImplementedException();
         }
 
         // これどこで使うメソッド？JSONだからクラスに直すのでは？
