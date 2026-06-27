@@ -22,8 +22,9 @@ public record GeoResult(
     );
 
 // 結果一覧（リスト）
+// nullを許容しておく。JSONデータが空の可能性があるから
 public record GeoResponse(
-    [property: JsonPropertyName("results")]  List<GeoResult> Results
+    [property: JsonPropertyName("results")]  List<GeoResult>? Results
     );
 
 // 天気予報はここから　
@@ -39,6 +40,7 @@ public record DailyData(
 
 // 天気予報一覧はこれ。List
 // 天気予報の一覧ってなんだろう、
+// TODO: JSONのデータが空の可能性がある。だからnullも許容してみた
 public record ForecastResponse(
-    [property: JsonPropertyName("daily")] DailyData Daily
+    [property: JsonPropertyName("daily")] DailyData? Daily
     );

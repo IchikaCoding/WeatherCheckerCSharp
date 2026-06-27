@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Policy;
 using System.Text.Json;
 using WeatherCheckerCSharp;
@@ -37,8 +38,9 @@ namespace WeatherCheckerCSharp
             // URLの作り方がわからない。非同期処理がGood
             // 変数名が変数名っぽく光っているかどうかを確認しよう！
             // TODO: どうしてURLを一括で書かないの？
-                //　Uri.EscapeDataString(cityName)はどうして使うの？
-            string geoUrl = $"https://geocoding-api.open-meteo.com/v1/search" + $"?name={EscapeDataString(cityName)}&count=1&language=ja&format=json";
+                //　Uri.EscapeDataString(cityName)はどうして使うの？Uriクラスってなに？
+                // クエリパラメーターの前はスラッシュいらないらしい
+            string geoUrl = $"https://geocoding-api.open-meteo.com/v1/search" + $"?name={Uri.EscapeDataString(cityName)}&count=1&language=ja&format=json";
             // EscapeDataStringでURLを安全な文字列に修正してくれうらしんだけど、間違っているかも、、、、
             // TODO: EscapeDataString()はここにいるのか？いらないのかい？
             string geoJson = await http.GetStringAsync(geoUrl);
@@ -46,14 +48,27 @@ namespace WeatherCheckerCSharp
 
             // デシリアライズするとrecordの型にはめる事が可能（？）
             GeoResponse? geoString = JsonSerializer.Deserialize<GeoResponse>(geoJson);
+            // 出力：geoString:GeoResponse { Results =  }
+            Debug.WriteLine($"geoString:{geoString}");
 
             // 緯度経度を取得する
             // TODO: これ間違っているらしい。
             // GeoResult? hit = geo?.Results?.FirstOrDefault();らしいよ
             // GeoResponseに入れたデータはレコードの型になっている。
             // そのResultsにアクセスすると、List<GeoResult>が取れる。
-            List<GeoResult> geoResults = geoString.Results;
+            List<GeoResult>? geoResults = geoString?.Results;
+            
+            // 出力：geoResults: 
+            Debug.WriteLine($"geoResults: {geoResults}");
 
+            // FirstOrDefault()を使わないでやってみたいときはこれでいいですか？
+            // ?でnull許容しすぎている気がするけどいいのかな？
+            // Listの中身が0の可能性があるから、件数も条件に入れる
+            if (geoResults is null || geoResults.Count == 0)
+            {
+                lblStatus.Text = $"「{cityName}」の検索結果がnullでした";
+                return;
+            }
             // Listの最初の要素は0だよ
             GeoResult geoFirstItem = geoResults[0];
 
@@ -72,10 +87,12 @@ namespace WeatherCheckerCSharp
             // 3日分取得
             // URLのパラメーター部分は最初?でその後は＆で続ける
             // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
+            // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
             string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={latitude}&longitude={longitude}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
             string forecastJson = await http.GetStringAsync(forecastUrl);
             // ForecastResponse型のデータにする
             ForecastResponse? forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson);
+            // nullの可能性があるっぽい？
             DailyData dailyData = forecastResponse.Daily;
             List<double> tempMaxList =  dailyData.TempMax;
              List<double> tempMinList =  dailyData.TempMin;
@@ -86,10 +103,10 @@ namespace WeatherCheckerCSharp
 
             }
 
-        private string? EscapeDataString(string url)
-        {
-            throw new NotImplementedException();
-        }
+        //private string? EscapeDataString(string url)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         // これどこで使うメソッド？JSONだからクラスに直すのでは？
         private void txtRaw_TextChanged(object sender, EventArgs e)
