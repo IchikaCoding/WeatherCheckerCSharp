@@ -101,6 +101,7 @@ namespace WeatherCheckerCSharp
             // 最高気温。1日目：15℃, 2日目：10℃
             lblStatus.Text = $"{cityName}：今日の最高 {tempMaxList[0]}℃ / 最低 {tempMinList[0]}℃";
 
+
             }
 
         //private string? EscapeDataString(string url)
@@ -114,7 +115,23 @@ namespace WeatherCheckerCSharp
             Console.WriteLine();
         }
 
-
+        // EmojiとLabelは戻り値
+        //  Describeメソッドでcodeが引数。これはAPIから帰ってくるコードを渡す場所
+        static (string Emoji, string Label) Describe(int code) => code switch
+        {
+            // codeが0なら快晴
+            0 => ("☀️", "快晴"),
+            // codeが1か2か3なら晴れ/くもりを返す
+            1 or 2 or 3 => ("⛅", "晴れ／くもり"),
+            45 or 48 => ("🌫️", "霧"),
+            51 or 53 or 55 => ("🌦️", "霧雨"),
+            61 or 63 or 65 => ("🌧️", "雨"),
+            71 or 73 or 75 => ("❄️", "雪"),
+            80 or 81 or 82 => ("🌧️", "にわか雨"),
+            95 or 96 or 99 => ("⛈️", "雷雨"),
+            // 0～99以外のコードが入っていたら不明と出力する
+            _ => ("❔", "不明"),
+        };
 
     }   
    }
