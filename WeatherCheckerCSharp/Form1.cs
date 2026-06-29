@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Security.Policy;
 using System.Text.Json;
+using System.Threading.Channels;
 using WeatherCheckerCSharp;
 using static System.Net.WebRequestMethods;
 
@@ -38,8 +39,10 @@ namespace WeatherCheckerCSharp
             // URLの作り方がわからない。非同期処理がGood
             // 変数名が変数名っぽく光っているかどうかを確認しよう！
             // TODO: どうしてURLを一括で書かないの？
-                //　Uri.EscapeDataString(cityName)はどうして使うの？Uriクラスってなに？
-                // クエリパラメーターの前はスラッシュいらないらしい
+            //　Uri.EscapeDataString(cityName)はどうして使うの？Uriクラスってなに？
+            // クエリパラメーターの前はスラッシュいらないらしい
+            // パラメーターの中にどうしてUri.EscapeDataStringがあるの？
+            // ▷文字列の中に予約語があった場合も安全に送るため
             string geoUrl = $"https://geocoding-api.open-meteo.com/v1/search" + $"?name={Uri.EscapeDataString(cityName)}&count=1&language=ja&format=json";
             // EscapeDataStringでURLを安全な文字列に修正してくれうらしんだけど、間違っているかも、、、、
             // TODO: EscapeDataString()はここにいるのか？いらないのかい？
@@ -133,5 +136,6 @@ namespace WeatherCheckerCSharp
             _ => ("❔", "不明"),
         };
 
+        
     }   
    }
