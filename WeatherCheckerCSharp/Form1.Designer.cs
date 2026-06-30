@@ -36,7 +36,7 @@
             // 
             // txtCity
             // 
-            txtCity.Location = new Point(90, 82);
+            txtCity.Location = new Point(52, 146);
             txtCity.Name = "txtCity";
             txtCity.Size = new Size(100, 23);
             txtCity.TabIndex = 0;
@@ -44,9 +44,9 @@
             // 
             // btnSearch
             // 
-            btnSearch.Location = new Point(143, 240);
+            btnSearch.Location = new Point(52, 233);
             btnSearch.Name = "btnSearch";
-            btnSearch.Size = new Size(75, 23);
+            btnSearch.Size = new Size(134, 68);
             btnSearch.TabIndex = 1;
             btnSearch.Text = "調べる";
             btnSearch.UseVisualStyleBackColor = true;
@@ -55,7 +55,7 @@
             // lblStatus
             // 
             lblStatus.AutoSize = true;
-            lblStatus.Location = new Point(326, 103);
+            lblStatus.Location = new Point(288, 52);
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new Size(38, 15);
             lblStatus.TabIndex = 2;
@@ -63,7 +63,7 @@
             // 
             // txtRaw
             // 
-            txtRaw.Location = new Point(357, 163);
+            txtRaw.Location = new Point(288, 278);
             txtRaw.Multiline = true;
             txtRaw.Name = "txtRaw";
             txtRaw.Size = new Size(100, 23);
