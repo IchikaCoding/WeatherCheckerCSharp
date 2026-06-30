@@ -122,6 +122,7 @@ namespace WeatherCheckerCSharp
                 sb.AppendLine($"{day.Time} {emoji} {label}");
                 sb.AppendLine($"最高気温：{day.Max} 最低気温：{day.Min} 降水確率：{day.Prob}");
             }
+            // sbはToString()で文字列として表示できるらしい
             lblStatus.Text = sb.ToString();
             //this.BackColor = days[0].Code == 0 ? Color.FromArgb(255, 247, 224): Color.FromArgb(232, 238, 245);
             // TODO:　thisってだれのこと？　ArgbのAって何が由来なの？　この色探しをするツールを探す
