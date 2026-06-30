@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection.Emit;
 using System.Security.Policy;
 using System.Text.Json;
 using System.Threading.Channels;
@@ -60,7 +61,7 @@ namespace WeatherCheckerCSharp
             // GeoResponseに入れたデータはレコードの型になっている。
             // そのResultsにアクセスすると、List<GeoResult>が取れる。
             List<GeoResult>? geoResults = geoString?.Results;
-            
+
             // 出力：geoResults: 
             Debug.WriteLine($"geoResults: {geoResults}");
 
@@ -83,10 +84,10 @@ namespace WeatherCheckerCSharp
                 lblStatus.Text = $"「{cityName}」が見つかりません";
                 return;
             }
-            
+
             double latitude = geoFirstItem.Latitude;
             double longitude = geoFirstItem.Longitude;
-            
+
             // 3日分取得
             // URLのパラメーター部分は最初?でその後は＆で続ける
             // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
@@ -97,15 +98,35 @@ namespace WeatherCheckerCSharp
             ForecastResponse? forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson);
             // nullの可能性があるっぽい？
             DailyData dailyData = forecastResponse.Daily;
-            List<double> tempMaxList =  dailyData.TempMax;
-             List<double> tempMinList =  dailyData.TempMin;
-
-
+            //Debug.WriteLine($"dailyData: {dailyData}");
+            List<double> tempMaxList = dailyData.TempMax;
+            List<double> tempMinList = dailyData.TempMin;
             // 最高気温。1日目：15℃, 2日目：10℃
             lblStatus.Text = $"{cityName}：今日の最高 {tempMaxList[0]}℃ / 最低 {tempMinList[0]}℃";
 
-
+            // ======================================================
+            // 3日分のデータを1日分ごとにまとめてリストにする
+            var days = new List<DayForecast>();
+            for(int i = 0; i < dailyData.Time.Count; i++)
+            {
+                days.Add(new DayForecast(dailyData.Time[i], dailyData.WeatherCode[i], dailyData.TempMax[i], dailyData.TempMin[i], dailyData.PrecipProb[i]));
             }
+            Debug.WriteLine($"days:{days}");
+
+            // AppendLineが使えるようになるっぽい
+            var sb = new System.Text.StringBuilder();
+
+            foreach (var day in days)
+            {
+                (string emoji,string label) = Describe(day.Code);
+                sb.AppendLine($"{day.Time} {emoji} {label}");
+                sb.AppendLine($"最高気温：{day.Max} 最低気温：{day.Min} 降水確率：{day.Prob}");
+            }
+            lblStatus.Text = sb.ToString();
+            //this.BackColor = days[0].Code == 0 ? Color.FromArgb(255, 247, 224): Color.FromArgb(232, 238, 245);
+            // TODO:　thisってだれのこと？　ArgbのAって何が由来なの？　この色探しをするツールを探す
+            this.BackColor = Color.FromArgb(255, 247, 224);
+        }
 
         //private string? EscapeDataString(string url)
         //{
@@ -136,6 +157,16 @@ namespace WeatherCheckerCSharp
             _ => ("❔", "不明"),
         };
 
-        
-    }   
-   }
+//        private void AddList()
+//        {
+//           public record DayForecast(string Date, int Code, double Max, double Min, int Pop);
+
+//            List<DayForecast> days = new List<DayForecast>();
+//                for (int i = 0; i<d.Time.Coount; i++){
+//                days.Add()
+//    }
+
+//};
+
+    }
+}

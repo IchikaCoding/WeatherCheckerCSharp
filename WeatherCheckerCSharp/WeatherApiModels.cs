@@ -44,3 +44,5 @@ public record DailyData(
 public record ForecastResponse(
     [property: JsonPropertyName("daily")] DailyData? Daily
     );
+
+public record DayForecast(string Time, int Code, double Max, double Min, int Prob);
