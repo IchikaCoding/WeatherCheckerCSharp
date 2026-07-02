@@ -19,6 +19,7 @@ namespace WeatherCheckerCSharp
             linkLabel1.Text = "Weather data by Open-Meteo.com";
             // リンクがクリックされたら、、
             // System.Diagnostics.Process.Start("起動したいアプリ")
+            // 引数はsenderとeventカナ？
             linkLabel1.LinkClicked += (s, e) => System.Diagnostics.Process.Start(
                // ここで外部アプリを開く処理を設定している
                // シェルを使用する必要がある場合はtrueにするらしい
@@ -146,8 +147,8 @@ namespace WeatherCheckerCSharp
             // ここはそもそもFrom1のクラス内。つまり、thisはForm1のインスタンスのこと
             this.BackColor = Color.FromArgb(255, 247, 224);
 
-            
-               
+
+
         }
 
         //private string? EscapeDataString(string url)
@@ -182,6 +183,32 @@ namespace WeatherCheckerCSharp
         private void label1_Click(object sender, EventArgs e)
         {
 
+        }
+        // 例外処理を一旦書いてみようね
+        private void button1_Click(object sender, EventArgs e)
+        {
+            static int CharToInt(char c)
+            {
+                // しんぐるじゃないとだめっぽいのなぜ？
+                return c - '0';
+            }
+            static int StringToInt(string str)
+            {
+                int val = 0;
+                foreach (char c in str)
+                {
+                    int i = CharToInt(c);
+                    val = val * 10 + i;
+                }
+                return val;
+            }
+            // 文字列もASCIIコードで数値として表すことも一応可能
+            //int result =  StringToInt("ichika");
+            int result2 = StringToInt("1234");
+            char numString = (char)48;
+            Debug.WriteLine($"numString:{numString}");
+
+            Debug.WriteLine($"result: {result2}"); // result: 6272339
         }
 
         //        private void AddList()

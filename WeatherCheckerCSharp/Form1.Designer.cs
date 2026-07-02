@@ -34,6 +34,7 @@
             txtRaw = new TextBox();
             linkLabel1 = new LinkLabel();
             linkLabel2 = new LinkLabel();
+            button1 = new Button();
             SuspendLayout();
             // 
             // txtCity
@@ -92,11 +93,22 @@
             linkLabel2.TabStop = true;
             linkLabel2.Text = "linkLabel2";
             // 
+            // button1
+            // 
+            button1.Location = new Point(82, 253);
+            button1.Name = "button1";
+            button1.Size = new Size(75, 23);
+            button1.TabIndex = 9;
+            button1.Text = "button1";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(button1);
             Controls.Add(linkLabel2);
             Controls.Add(linkLabel1);
             Controls.Add(txtRaw);
@@ -118,6 +130,7 @@
         private TextBox txtRaw;
         private LinkLabel linkLabel1;
         private LinkLabel linkLabel2;
+        private Button button1;
         //private Label linkOpenMeteo;
     }
 }
