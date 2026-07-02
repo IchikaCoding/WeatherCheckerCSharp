@@ -189,8 +189,17 @@ namespace WeatherCheckerCSharp
         {
             static int CharToInt(char c)
             {
-                // しんぐるじゃないとだめっぽいのなぜ？
-                return c - '0';
+                if('0' <= c && c <= '9')
+                {
+                    // しんぐるじゃないとだめっぽいのなぜ？
+                    return c - '0';
+                }
+                else
+                {
+                    Debug.WriteLine("入力値が0以上9以下を満たしません");
+                    return -1;
+                }
+                
             }
             static int StringToInt(string str)
             {
@@ -198,17 +207,22 @@ namespace WeatherCheckerCSharp
                 foreach (char c in str)
                 {
                     int i = CharToInt(c);
+                    if(i == -1)
+                    {
+                        return -1;
+                    }
                     val = val * 10 + i;
                 }
                 return val;
             }
             // 文字列もASCIIコードで数値として表すことも一応可能
-            //int result =  StringToInt("ichika");
+            int result = StringToInt("ichika");
             int result2 = StringToInt("1234");
-            char numString = (char)48;
-            Debug.WriteLine($"numString:{numString}");
+            //char numString = (char)48;
+            //Debug.WriteLine($"numString:{numString}");
 
-            Debug.WriteLine($"result: {result2}"); // result: 6272339
+            Debug.WriteLine($"result: {result}"); // result: 6272339
+            Debug.WriteLine($"result2: {result2}");
         }
 
         //        private void AddList()
