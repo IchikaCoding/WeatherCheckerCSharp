@@ -13,6 +13,23 @@ namespace WeatherCheckerCSharp
         public Form1()
         {
             InitializeComponent();
+            // 参照先を表示
+            // リンクラベルの表示を書き換える
+            // TODO: イベントについて学んだあとにもう一度このコードを見直す
+            linkLabel1.Text = "Weather data by Open-Meteo.com";
+            // リンクがクリックされたら、、
+            // System.Diagnostics.Process.Start("起動したいアプリ")
+            linkLabel1.LinkClicked += (s, e) => System.Diagnostics.Process.Start(
+               // ここで外部アプリを開く処理を設定している
+               // シェルを使用する必要がある場合はtrueにするらしい
+               // UseShellExecuteがtrueだと、シェルを使って処理を実行したいっていう設定？
+               new System.Diagnostics.ProcessStartInfo("https://open-meteo.com/") { UseShellExecute = true });
+            linkLabel2.Text = "🌻いちかどんのGitHubのページ🌻";
+            //linkLabel2.LinkClicked += (s, e) => System.Diagnostics.Process.Start(
+            //    new System.Diagnostics.ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories") { UseShellExecute = true }
+            //    );
+            linkLabel2.LinkClicked += (s, e) => System.Diagnostics.Process.Start("notepad");
+            Debug.WriteLine(new System.Diagnostics.ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories"));
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -129,22 +146,7 @@ namespace WeatherCheckerCSharp
             // ここはそもそもFrom1のクラス内。つまり、thisはForm1のインスタンスのこと
             this.BackColor = Color.FromArgb(255, 247, 224);
 
-            // 参照先を表示
-            // リンクラベルの表示を書き換える
-            linkLabel1.Text = "Weather data by Open-Meteo.com";
-            // リンクがクリックされたら、、
-            // System.Diagnostics.Process.Start("起動したいアプリ")
-            linkLabel1.LinkClicked += (s, e) => System.Diagnostics.Process.Start(
-                // ここで外部アプリを開く処理を設定している
-                // シェルを使用する必要がある場合はtrueにするらしい
-                // UseShellExecuteがtrueだと、シェルを使って処理を実行したいっていう設定？
-               new System.Diagnostics.ProcessStartInfo("https://open-meteo.com/") { UseShellExecute = true });
-            linkLabel2.Text = "🌻いちかどんのGitHubのページ🌻";
-            //linkLabel2.LinkClicked += (s, e) => System.Diagnostics.Process.Start(
-            //    new System.Diagnostics.ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories") { UseShellExecute = true }
-            //    );
-            linkLabel2.LinkClicked += (s, e) => System.Diagnostics.Process.Start("notepad");
-            Debug.WriteLine(new System.Diagnostics.ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories"));
+            
                
         }
 
