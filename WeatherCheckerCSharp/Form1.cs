@@ -107,7 +107,7 @@ namespace WeatherCheckerCSharp
             // ======================================================
             // 3日分のデータを1日分ごとにまとめてリストにする
             var days = new List<DayForecast>();
-            for(int i = 0; i < dailyData.Time.Count; i++)
+            for (int i = 0; i < dailyData.Time.Count; i++)
             {
                 days.Add(new DayForecast(dailyData.Time[i], dailyData.WeatherCode[i], dailyData.TempMax[i], dailyData.TempMin[i], dailyData.PrecipProb[i]));
             }
@@ -118,7 +118,7 @@ namespace WeatherCheckerCSharp
 
             foreach (var day in days)
             {
-                (string emoji,string label) = Describe(day.Code);
+                (string emoji, string label) = Describe(day.Code);
                 sb.AppendLine($"{day.Time} {emoji} {label}");
                 sb.AppendLine($"最高気温：{day.Max} 最低気温：{day.Min} 降水確率：{day.Prob}");
             }
@@ -126,7 +126,26 @@ namespace WeatherCheckerCSharp
             lblStatus.Text = sb.ToString();
             //this.BackColor = days[0].Code == 0 ? Color.FromArgb(255, 247, 224): Color.FromArgb(232, 238, 245);
             // TODO:　thisってだれのこと？　ArgbのAって何が由来なの？　この色探しをするツールを探す
+            // ここはそもそもFrom1のクラス内。つまり、thisはForm1のインスタンスのこと
             this.BackColor = Color.FromArgb(255, 247, 224);
+
+            // 参照先を表示
+            // リンクラベルの表示を書き換える
+            linkLabel1.Text = "Weather data by Open-Meteo.com";
+            // リンクがクリックされたら、、
+            // System.Diagnostics.Process.Start("起動したいアプリ")
+            linkLabel1.LinkClicked += (s, e) => System.Diagnostics.Process.Start(
+                // ここで外部アプリを開く処理を設定している
+                // シェルを使用する必要がある場合はtrueにするらしい
+                // UseShellExecuteがtrueだと、シェルを使って処理を実行したいっていう設定？
+               new System.Diagnostics.ProcessStartInfo("https://open-meteo.com/") { UseShellExecute = true });
+            linkLabel2.Text = "🌻いちかどんのGitHubのページ🌻";
+            //linkLabel2.LinkClicked += (s, e) => System.Diagnostics.Process.Start(
+            //    new System.Diagnostics.ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories") { UseShellExecute = true }
+            //    );
+            linkLabel2.LinkClicked += (s, e) => System.Diagnostics.Process.Start("notepad");
+            Debug.WriteLine(new System.Diagnostics.ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories"));
+               
         }
 
         //private string? EscapeDataString(string url)
@@ -158,16 +177,21 @@ namespace WeatherCheckerCSharp
             _ => ("❔", "不明"),
         };
 
-//        private void AddList()
-//        {
-//           public record DayForecast(string Date, int Code, double Max, double Min, int Pop);
+        private void label1_Click(object sender, EventArgs e)
+        {
 
-//            List<DayForecast> days = new List<DayForecast>();
-//                for (int i = 0; i<d.Time.Coount; i++){
-//                days.Add()
-//    }
+        }
 
-//};
+        //        private void AddList()
+        //        {
+        //           public record DayForecast(string Date, int Code, double Max, double Min, int Pop);
+
+        //            List<DayForecast> days = new List<DayForecast>();
+        //                for (int i = 0; i<d.Time.Coount; i++){
+        //                days.Add()
+        //    }
+
+        //};
 
     }
 }
