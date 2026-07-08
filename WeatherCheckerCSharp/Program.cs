@@ -19,6 +19,8 @@ namespace WeatherCheckerCSharp
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.Run(new Form1());
+            //GeoInfo geoInfo = new GeoInfo(11,19);
+            //Console.WriteLine($"geoInfo: {geoInfo}");
         }
     }
 }

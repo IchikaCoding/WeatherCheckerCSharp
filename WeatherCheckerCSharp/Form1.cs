@@ -53,58 +53,76 @@ namespace WeatherCheckerCSharp
             // この処理結果を代入しておく必要がある
             string cityName = txtCity.Text.Trim();
 
-            // GeoResponseを受ける
-            // URLで都市名で検索する
-            // URLの作り方がわからない。非同期処理がGood
-            // 変数名が変数名っぽく光っているかどうかを確認しよう！
-            // TODO: どうしてURLを一括で書かないの？
-            //　Uri.EscapeDataString(cityName)はどうして使うの？Uriクラスってなに？
-            // クエリパラメーターの前はスラッシュいらないらしい
-            // パラメーターの中にどうしてUri.EscapeDataStringがあるの？
-            // ▷文字列の中に予約語があった場合も安全に送るため
-            string geoUrl = $"https://geocoding-api.open-meteo.com/v1/search" + $"?name={Uri.EscapeDataString(cityName)}&count=1&language=ja&format=json";
-            // EscapeDataStringでURLを安全な文字列に修正してくれうらしんだけど、間違っているかも、、、、
-            // TODO: EscapeDataString()はここにいるのか？いらないのかい？
-            string geoJson = await http.GetStringAsync(geoUrl);
-            txtRaw.Text = geoJson;
+            // TODO: 都市がない例外の型を作成しておく
+            // TODO: ここに都市名がなかったら早期リターンを実装
+            // TODO: ボタンを押せないようにしておく
+            // TODO: 画面に取得中...を表示する
+            // TODO: 都市名から土地のコードを取得する処理を1つの関数にする
+            // TODO: 天気予報を返す処理を書く
+            // TODO: HttpRequestExceptionの例外もキャッチする
+            // TODO: ボタンをもとに戻す。
+            // TODO: 状態の表示をなくす
 
-            // デシリアライズするとrecordの型にはめる事が可能（？）
-            GeoResponse? geoString = JsonSerializer.Deserialize<GeoResponse>(geoJson);
-            // 出力：geoString:GeoResponse { Results =  }
-            Debug.WriteLine($"geoString:{geoString}");
 
-            // 緯度経度を取得する
-            // TODO: これ間違っているらしい。
-            // GeoResult? hit = geo?.Results?.FirstOrDefault();らしいよ
-            // GeoResponseに入れたデータはレコードの型になっている。
-            // そのResultsにアクセスすると、List<GeoResult>が取れる。
-            List<GeoResult>? geoResults = geoString?.Results;
-
-            // 出力：geoResults: 
-            Debug.WriteLine($"geoResults: {geoResults}");
-
-            // FirstOrDefault()を使わないでやってみたいときはこれでいいですか？
-            // ?でnull許容しすぎている気がするけどいいのかな？
-            // Listの中身が0の可能性があるから、件数も条件に入れる
-            if (geoResults is null || geoResults.Count == 0)
+            async GeoInfo? GeocodeAsync(string cityName)
             {
-                lblStatus.Text = $"「{cityName}」の検索結果がnullでした";
-                return;
-            }
-            // Listの最初の要素は0だよ
-            GeoResult geoFirstItem = geoResults[0];
+                // GeoResponseを受ける
+                // URLで都市名で検索する
+                // URLの作り方がわからない。非同期処理がGood
+                // 変数名が変数名っぽく光っているかどうかを確認しよう！
+                // TODO: どうしてURLを一括で書かないの？
+                //　Uri.EscapeDataString(cityName)はどうして使うの？Uriクラスってなに？
+                // クエリパラメーターの前はスラッシュいらないらしい
+                // パラメーターの中にどうしてUri.EscapeDataStringがあるの？
+                // ▷文字列の中に予約語があった場合も安全に送るため
+                string geoUrl = $"https://geocoding-api.open-meteo.com/v1/search" + $"?name={Uri.EscapeDataString(cityName)}&count=1&language=ja&format=json";
+                // EscapeDataStringでURLを安全な文字列に修正してくれうらしんだけど、間違っているかも、、、、
+                // TODO: EscapeDataString()はここにいるのか？いらないのかい？
+                string geoJson = await http.GetStringAsync(geoUrl);
+                txtRaw.Text = geoJson;
 
-            // 都市名が見つからなかった場合はここで早期リターン
-            // TODO: 取得出来なかった判定はどうやってやるの？
-            // GeoResultのNameプロパティがnullだったら、という条件じゃだめ？
-            if (geoFirstItem is null)
-            {
-                lblStatus.Text = $"「{cityName}」が見つかりません";
-                return;
-            }
+                // デシリアライズするとrecordの型にはめる事が可能（？）
+                GeoResponse? geoString = JsonSerializer.Deserialize<GeoResponse>(geoJson);
+                // 出力：geoString:GeoResponse { Results =  }
+                Debug.WriteLine($"geoString:{geoString}");
 
-            double latitude = geoFirstItem.Latitude;
-            double longitude = geoFirstItem.Longitude;
+                // 緯度経度を取得する
+                // TODO: これ間違っているらしい。
+                // GeoResult? hit = geo?.Results?.FirstOrDefault();らしいよ
+                // GeoResponseに入れたデータはレコードの型になっている。
+                // そのResultsにアクセスすると、List<GeoResult>が取れる。
+                List<GeoResult>? geoResults = geoString?.Results;
+
+                // 出力：geoResults: 
+                Debug.WriteLine($"geoResults: {geoResults}");
+
+                // FirstOrDefault()を使わないでやってみたいときはこれでいいですか？
+                // ?でnull許容しすぎている気がするけどいいのかな？
+                // Listの中身が0の可能性があるから、件数も条件に入れる
+                if (geoResults is null || geoResults.Count == 0)
+                {
+                    lblStatus.Text = $"「{cityName}」の検索結果がnullでした";
+                    return null;
+                }
+                // Listの最初の要素は0だよ
+                GeoResult geoFirstItem = geoResults[0];
+
+                // 都市名が見つからなかった場合はここで早期リターン
+                // TODO: 取得出来なかった判定はどうやってやるの？
+                // GeoResultのNameプロパティがnullだったら、という条件じゃだめ？
+                if (geoFirstItem is null)
+                {
+                    lblStatus.Text = $"「{cityName}」が見つかりません";
+                    return null;
+                }
+                // クラスで型を作成して戻り値にしてみる？
+                // 戻り値が複数ある時って、タプルとクラスの2種類ある？
+                double latitude = geoFirstItem.Latitude;
+                // ロンジェチュードって読むらしい
+                double longitude = geoFirstItem.Longitude;
+                return new GeoInfo { Latitude = }
+            }
+            
 
             // 3日分取得
             // URLのパラメーター部分は最初?でその後は＆で続ける
