@@ -123,16 +123,20 @@ namespace WeatherCheckerCSharp
                 // recordだから、括弧の中に直接値を渡したらプロパティに入れれるかも？！
                 return new GeoInfo(latitude, longitude);
             }
-            
+
             // GeocodeAsyncで取得した戻り値をawait して実行
             // Nullじゃなかった場合、例外を返す
-
+            GeoInfo? geoInfo = await GeocodeAsync(cityName);
+            if(geoInfo is null)
+            {
+                return;
+            }
 
             // 3日分取得
             // URLのパラメーター部分は最初?でその後は＆で続ける
             // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
             // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
-            string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={latitude}&longitude={longitude}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
+            string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={geoInfo.Latitude}&longitude={geoInfo.Longitude}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
             string forecastJson = await http.GetStringAsync(forecastUrl);
             // ForecastResponse型のデータにする
             ForecastResponse? forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson);
