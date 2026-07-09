@@ -63,8 +63,8 @@ namespace WeatherCheckerCSharp
             // TODO: ボタンをもとに戻す。
             // TODO: 状態の表示をなくす
 
-
-            async GeoInfo? GeocodeAsync(string cityName)
+            // 非同期処理＋recordでちょっと壁高めかも
+            async Task<GeoInfo?> GeocodeAsync(string cityName)
             {
                 // GeoResponseを受ける
                 // URLで都市名で検索する
@@ -120,9 +120,13 @@ namespace WeatherCheckerCSharp
                 double latitude = geoFirstItem.Latitude;
                 // ロンジェチュードって読むらしい
                 double longitude = geoFirstItem.Longitude;
-                return new GeoInfo { Latitude = }
+                // recordだから、括弧の中に直接値を渡したらプロパティに入れれるかも？！
+                return new GeoInfo(latitude, longitude);
             }
             
+            // GeocodeAsyncで取得した戻り値をawait して実行
+            // Nullじゃなかった場合、例外を返す
+
 
             // 3日分取得
             // URLのパラメーター部分は最初?でその後は＆で続ける
