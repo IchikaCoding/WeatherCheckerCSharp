@@ -64,7 +64,7 @@ namespace WeatherCheckerCSharp
             // TODO: 状態の表示をなくす
 
             // 非同期処理＋recordでちょっと壁高めかも
-            async Task<GeoInfo?> GeocodeAsync(string cityName)
+            async Task<GeoInfo?> GeoCodeAsync(string cityName)
             {
                 // GeoResponseを受ける
                 // URLで都市名で検索する
@@ -112,8 +112,9 @@ namespace WeatherCheckerCSharp
                 // GeoResultのNameプロパティがnullだったら、という条件じゃだめ？
                 if (geoFirstItem is null)
                 {
+
                     lblStatus.Text = $"「{cityName}」が見つかりません";
-                    return null;
+                    throw new CityNotFoundException("cityName");
                 }
                 // クラスで型を作成して戻り値にしてみる？
                 // 戻り値が複数ある時って、タプルとクラスの2種類ある？
@@ -124,57 +125,90 @@ namespace WeatherCheckerCSharp
                 return new GeoInfo(latitude, longitude);
             }
 
-            // GeocodeAsyncで取得した戻り値をawait して実行
-            // Nullじゃなかった場合、例外を返す
-            GeoInfo? geoInfo = await GeocodeAsync(cityName);
-            if(geoInfo is null)
+            // ＝＝＝＝＝実行させる場所＝＝＝＝＝
+            if (string.IsNullOrEmpty(cityName))
             {
+                MessageBox.Show("都市名を入力してください🙇‍");
                 return;
             }
-
-            // 3日分取得
-            // URLのパラメーター部分は最初?でその後は＆で続ける
-            // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
-            // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
-            string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={geoInfo.Latitude}&longitude={geoInfo.Longitude}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
-            string forecastJson = await http.GetStringAsync(forecastUrl);
-            // ForecastResponse型のデータにする
-            ForecastResponse? forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson);
-            // nullの可能性があるっぽい？
-            DailyData dailyData = forecastResponse.Daily;
-            //Debug.WriteLine($"dailyData: {dailyData}");
-            List<double> tempMaxList = dailyData.TempMax;
-            List<double> tempMinList = dailyData.TempMin;
-            // 最高気温。1日目：15℃, 2日目：10℃
-            lblStatus.Text = $"{cityName}：今日の最高 {tempMaxList[0]}℃ / 最低 {tempMinList[0]}℃";
-
-            // ======================================================
-            // 3日分のデータを1日分ごとにまとめてリストにする
-            var days = new List<DayForecast>();
-            for (int i = 0; i < dailyData.Time.Count; i++)
+            btnSearch.Enabled = false;
+            lblStatus.Text = "取得中・・・";
+            try
             {
-                days.Add(new DayForecast(dailyData.Time[i], dailyData.WeatherCode[i], dailyData.TempMax[i], dailyData.TempMin[i], dailyData.PrecipProb[i]));
+                // GeoCodeAsyncで取得した戻り値をawait して実行
+                // Nullじゃなかった場合、例外を返す
+                GeoInfo? geoInfo = await GeoCodeAsync(cityName);
+                if (geoInfo is null)
+                {
+                    return;
+                }
+                List<DayForecast> dayForecasts = await DayForecastAsync(geoInfo);
+                Debug.WriteLine($"dayForecasts: {dayForecasts}");
+                ShowDayForecast(dayForecasts);
             }
-            Debug.WriteLine($"days:{days}");
-
-            // AppendLineが使えるようになるっぽい
-            var sb = new System.Text.StringBuilder();
-
-            foreach (var day in days)
+            catch (CityNotFoundException error)
             {
-                (string emoji, string label) = Describe(day.Code);
-                sb.AppendLine($"{day.Time} {emoji} {label}");
-                sb.AppendLine($"最高気温：{day.Max} 最低気温：{day.Min} 降水確率：{day.Prob}");
+                MessageBox.Show(error.Message);
+            }catch(HttpRequestException error)
+            {
+                MessageBox.Show($"通信エラーです！！！{error.Message}");
             }
-            // sbはToString()で文字列として表示できるらしい
-            lblStatus.Text = sb.ToString();
-            //this.BackColor = days[0].Code == 0 ? Color.FromArgb(255, 247, 224): Color.FromArgb(232, 238, 245);
-            // TODO:　thisってだれのこと？　ArgbのAって何が由来なの？　この色探しをするツールを探す
-            // ここはそもそもFrom1のクラス内。つまり、thisはForm1のインスタンスのこと
-            this.BackColor = Color.FromArgb(255, 247, 224);
+            finally
+            {
+                btnSearch.Enabled = true;
+                
+            }
+            
+
+            async Task<List<DayForecast>> DayForecastAsync(GeoInfo geoInfoPram)
+            {
+                // 3日分取得
+                // URLのパラメーター部分は最初?でその後は＆で続ける
+                // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
+                // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
+                string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={geoInfoPram.Latitude}&longitude={geoInfoPram.Longitude}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
+                string forecastJson = await http.GetStringAsync(forecastUrl);
+                // ForecastResponse型のデータにする
+                ForecastResponse? forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson);
+                // nullの可能性があるっぽい？
+                DailyData dailyData = forecastResponse.Daily;
+                //Debug.WriteLine($"dailyData: {dailyData}");
+                List<double> tempMaxList = dailyData.TempMax;
+                List<double> tempMinList = dailyData.TempMin;
+                // 最高気温。1日目：15℃, 2日目：10℃
+                lblStatus.Text = $"{cityName}：今日の最高 {tempMaxList[0]}℃ / 最低 {tempMinList[0]}℃";
+
+                // ======================================================
+                // 3日分のデータを1日分ごとにまとめてリストにする
+                var days = new List<DayForecast>();
+                for (int i = 0; i < dailyData.Time.Count; i++)
+                {
+                    days.Add(new DayForecast(dailyData.Time[i], dailyData.WeatherCode[i], dailyData.TempMax[i], dailyData.TempMin[i], dailyData.PrecipProb[i]));
+                }
+                Debug.WriteLine($"days:{days}");
+                return days;
+            }
 
 
+            void ShowDayForecast(List<DayForecast> dayForecasts)
+            {
+                // AppendLineが使えるようになるっぽい
+                var sb = new System.Text.StringBuilder();
 
+                foreach (var day in dayForecasts)
+                {
+                    (string emoji, string label) = Describe(day.Code);
+                    sb.AppendLine($"{day.Time} {emoji} {label}");
+                    sb.AppendLine($"最高気温：{day.Max} 最低気温：{day.Min} 降水確率：{day.Prob}");
+                }
+                // sbはToString()で文字列として表示できるらしい
+                lblStatus.Text = sb.ToString();
+                //this.BackColor = days[0].Code == 0 ? Color.FromArgb(255, 247, 224): Color.FromArgb(232, 238, 245);
+                // TODO:　thisってだれのこと？　ArgbのAって何が由来なの？　この色探しをするツールを探す
+                // ここはそもそもFrom1のクラス内。つまり、thisはForm1のインスタンスのこと
+                this.BackColor = Color.FromArgb(255, 247, 224);
+
+            }
         }
 
         //private string? EscapeDataString(string url)
