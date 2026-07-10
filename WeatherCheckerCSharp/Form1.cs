@@ -182,6 +182,8 @@ namespace WeatherCheckerCSharp
                 ForecastResponse? forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson);
                 // nullの可能性があるっぽい？
                 DailyData dailyData = forecastResponse.Daily;
+                
+                // ==================以下の部分はまだ例外の処理の実装メモがないよ====================
                 //Debug.WriteLine($"dailyData: {dailyData}");
                 List<double> tempMaxList = dailyData.TempMax;
                 List<double> tempMinList = dailyData.TempMin;
