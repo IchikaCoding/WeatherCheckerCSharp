@@ -64,8 +64,14 @@ namespace WeatherCheckerCSharp
             // TODO: 状態の表示をなくす
 
             // 非同期処理＋recordでちょっと壁高めかも
-            async Task<GeoInfo?> GeoCodeAsync(string cityName)
+            // cityNameはstring?のほうがいいのかな？
+            async Task<GeoInfo> GeoCodeAsync(string cityName)
             {
+                // TODO: 2026-07-10ここ
+                if (string.IsNullOrWhiteSpace(cityName))
+                {
+                    throw new ArgumentException("都市名を入力してください");
+                }
                 // GeoResponseを受ける
                 // URLで都市名で検索する
                 // URLの作り方がわからない。非同期処理がGood
@@ -78,12 +84,25 @@ namespace WeatherCheckerCSharp
                 string geoUrl = $"https://geocoding-api.open-meteo.com/v1/search" + $"?name={Uri.EscapeDataString(cityName)}&count=1&language=ja&format=json";
                 // EscapeDataStringでURLを安全な文字列に修正してくれうらしんだけど、間違っているかも、、、、
                 // TODO: EscapeDataString()はここにいるのか？いらないのかい？
+                // TODO: ここでnullが返ってくる可能性はないの？GeoResponse? geoString はnullの可能性がないと言うコードにした
                 string geoJson = await http.GetStringAsync(geoUrl);
                 txtRaw.Text = geoJson;
 
+                // optionでJSONとプロパティ名をクラスに合わせて修正してくれる
+                var option = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
                 // デシリアライズするとrecordの型にはめる事が可能（？）
-                GeoResponse? geoString = JsonSerializer.Deserialize<GeoResponse>(geoJson);
-                // 出力：geoString:GeoResponse { Results =  }
+                // TODO: GeoResponseはnullが入る可能性ある？
+                // TODO: Null許容型でいいのかどうか知りたい
+                GeoResponse geoString = JsonSerializer.Deserialize<GeoResponse>(geoJson, option) ?? throw new InvalidOperationException("位置情報APIのレスポンスを読み取れませんでした。"));
+
+                if (geoString is null)
+                {
+                    // ここはnullで例外を出す処理
+                    throw new Exception();
+                }
                 Debug.WriteLine($"geoString:{geoString}");
 
                 // 緯度経度を取得する
@@ -93,8 +112,8 @@ namespace WeatherCheckerCSharp
                 // そのResultsにアクセスすると、List<GeoResult>が取れる。
                 List<GeoResult>? geoResults = geoString?.Results;
 
-                // 出力：geoResults: 
-                Debug.WriteLine($"geoResults: {geoResults}");
+                //// 出力：geoResults: 
+                //Debug.WriteLine($"geoResults: {geoResults}");
 
                 // FirstOrDefault()を使わないでやってみたいときはこれでいいですか？
                 // ?でnull許容しすぎている気がするけどいいのかな？
@@ -102,7 +121,8 @@ namespace WeatherCheckerCSharp
                 if (geoResults is null || geoResults.Count == 0)
                 {
                     lblStatus.Text = $"「{cityName}」の検索結果がnullでした";
-                    return null;
+                    // ここは例外に直す👉️CityNotFoundException
+                    throw new CityNotFoundException($"「{cityName}」の検索結果がnullでした");
                 }
                 // Listの最初の要素は0だよ
                 GeoResult geoFirstItem = geoResults[0];
@@ -114,7 +134,7 @@ namespace WeatherCheckerCSharp
                 {
 
                     lblStatus.Text = $"「{cityName}」が見つかりません";
-                    throw new CityNotFoundException("cityName");
+                    throw new CityNotFoundException(cityName);
                 }
                 // クラスで型を作成して戻り値にしてみる？
                 // 戻り値が複数ある時って、タプルとクラスの2種類ある？
