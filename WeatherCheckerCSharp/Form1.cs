@@ -52,17 +52,6 @@ namespace WeatherCheckerCSharp
             // JSON文字列がない、、、
             // この処理結果を代入しておく必要がある
             string cityName = txtCity.Text.Trim();
-
-            // TODO: 都市がない例外の型を作成しておく
-            // TODO: ここに都市名がなかったら早期リターンを実装
-            // TODO: ボタンを押せないようにしておく
-            // TODO: 画面に取得中...を表示する
-            // TODO: 都市名から土地のコードを取得する処理を1つの関数にする
-            // TODO: 天気予報を返す処理を書く
-            // TODO: HttpRequestExceptionの例外もキャッチする
-            // TODO: ボタンをもとに戻す。
-            // TODO: 状態の表示をなくす
-
             // 非同期処理＋recordでちょっと壁高めかも
             // cityNameはstring?のほうがいいのかな？
             async Task<GeoInfo> GeoCodeAsync(string cityName)
@@ -94,33 +83,31 @@ namespace WeatherCheckerCSharp
                     PropertyNameCaseInsensitive = true
                 };
                 // デシリアライズするとrecordの型にはめる事が可能（？）
-                // TODO: GeoResponseはnullが入る可能性ある？
-                // TODO: Null許容型でいいのかどうか知りたい
-                GeoResponse geoString = JsonSerializer.Deserialize<GeoResponse>(geoJson, option) ?? throw new InvalidOperationException("位置情報APIのレスポンスを読み取れませんでした。"));
+                // TODO: GeoResponseはnullが入る可能性ある？👉️例外に変えたからnullにならない
+                // TODO: どうしてInvalidOperationExceptionの例外を使用したの？
+                GeoResponse geoString = JsonSerializer.Deserialize<GeoResponse>(geoJson, option) ?? throw new InvalidOperationException("位置情報APIのレスポンスを読み取れませんでした。");
 
-                if (geoString is null)
-                {
-                    // ここはnullで例外を出す処理
-                    throw new Exception();
-                }
-                Debug.WriteLine($"geoString:{geoString}");
+                // Debug.WriteLine($"geoString:{geoString}");
 
                 // 緯度経度を取得する
-                // TODO: これ間違っているらしい。
                 // GeoResult? hit = geo?.Results?.FirstOrDefault();らしいよ
                 // GeoResponseに入れたデータはレコードの型になっている。
                 // そのResultsにアクセスすると、List<GeoResult>が取れる。
-                List<GeoResult>? geoResults = geoString?.Results;
+
+                // TODO: Resultsプロパティってnullになる可能性はある？
+                // GeoResponsの型としてgeoString変数がある
+                // →Resultsプロパティが存在するってこと→nullになる可能性ないのでは？
+                // 👉️GeoResponseが合っても、Resultsに値が入っているとは限らない。nullの可能性がある
+                // 外からくるデータはnull許容型で受け止めてあげるほうが安全！
+                List<GeoResult>? geoResults = geoString.Results;
 
                 //// 出力：geoResults: 
                 //Debug.WriteLine($"geoResults: {geoResults}");
 
                 // FirstOrDefault()を使わないでやってみたいときはこれでいいですか？
-                // ?でnull許容しすぎている気がするけどいいのかな？
                 // Listの中身が0の可能性があるから、件数も条件に入れる
                 if (geoResults is null || geoResults.Count == 0)
                 {
-                    lblStatus.Text = $"「{cityName}」の検索結果がnullでした";
                     // ここは例外に直す👉️CityNotFoundException
                     throw new CityNotFoundException($"「{cityName}」の検索結果がnullでした");
                 }
@@ -130,12 +117,13 @@ namespace WeatherCheckerCSharp
                 // 都市名が見つからなかった場合はここで早期リターン
                 // TODO: 取得出来なかった判定はどうやってやるの？
                 // GeoResultのNameプロパティがnullだったら、という条件じゃだめ？
-                if (geoFirstItem is null)
-                {
+                // TODO: この処理によってgeoResultsが0件以上っていうことになっている
+                // if (geoFirstItem is null)
+                // {
 
-                    lblStatus.Text = $"「{cityName}」が見つかりません";
-                    throw new CityNotFoundException(cityName);
-                }
+                //     lblStatus.Text = $"「{cityName}」が見つかりません";
+                //     throw new CityNotFoundException(cityName);
+                // }
                 // クラスで型を作成して戻り値にしてみる？
                 // 戻り値が複数ある時って、タプルとクラスの2種類ある？
                 double latitude = geoFirstItem.Latitude;
@@ -168,6 +156,8 @@ namespace WeatherCheckerCSharp
             }
             catch (CityNotFoundException error)
             {
+                // GeoCodeAsyncから切り離してこっちで表示されるように修正
+                lblStatus.Text = $"「{cityName}」の検索結果がnullでした";
                 MessageBox.Show(error.Message);
             }catch(HttpRequestException error)
             {
