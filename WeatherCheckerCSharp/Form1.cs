@@ -197,8 +197,13 @@ namespace WeatherCheckerCSharp
                 }
                 // ==================以下の部分はまだ例外の処理の実装メモがないよ====================
                 //Debug.WriteLine($"dailyData: {dailyData}");
-                List<double> tempMaxList = dailyData.TempMax;
-                List<double> tempMinList = dailyData.TempMin;
+                List<double>? tempMaxList = dailyData.TempMax;
+                List<double>? tempMinList = dailyData.TempMin;
+
+                if(tempMaxList is null || tempMinList is null)
+                {
+                    throw new JsonException("天気予報APIのレスポンスに最高気温、もしくは最低気温のデータがありませんでした。");
+                }
                 // 最高気温。1日目：15℃, 2日目：10℃
                 lblStatus.Text = $"{cityName}：今日の最高 {tempMaxList[0]}℃ / 最低 {tempMinList[0]}℃";
 
