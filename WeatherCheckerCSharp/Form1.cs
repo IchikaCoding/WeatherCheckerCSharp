@@ -198,30 +198,35 @@ namespace WeatherCheckerCSharp
                 // ==================以下の部分はまだ例外の処理の実装メモがないよ====================
                 //Debug.WriteLine($"dailyData: {dailyData}");
                 List<string>? timeList = dailyData.Time;
-                List<int> weatherCode = dailyData.WeatherCode;
+                List<int> weatherCodeList = dailyData.WeatherCode;
                 List<double>? tempMaxList = dailyData.TempMax;
                 List<double>? tempMinList = dailyData.TempMin;
                 List<int> precipProbList = dailyData.PrecipProb;
 
-                if (timeList is null || weatherCode is null || tempMaxList is null || tempMinList is null || precipProbList is null)
+                if (timeList is null || weatherCodeList is null || tempMaxList is null || tempMinList is null || precipProbList is null)
                 {
                     throw new JsonException("天気予報APIのレスポンスに最高気温、もしくは最低気温のデータがありませんでした。");
+                }
+                
+                int count = timeList.Count;
+                if(count == 0)
+                {
+                    throw new JsonException("天気予報APIのレスポンスの1日ごとのデータが取得出来ませんでした");
+                }
+                if(weatherCodeList.Count != count || tempMaxList.Count != count || tempMinList.Count != count || precipProbList.Count != count)
+                {
+                    throw new JsonException("天気予報APIのレスポンスのデータがうまく取得出来ませんでした");
                 }
                 // 最高気温。1日目：15℃, 2日目：10℃
                 lblStatus.Text = $"{cityName}：今日の最高 {tempMaxList[0]}℃ / 最低 {tempMinList[0]}℃";
 
-                int count = timeList.Count;
-                if(weatherCode.Count != count || tempMaxList.Count != count || tempMinList.Count != count || precipProbList.Count != count)
-                {
-                    throw new JsonException("天気予報APIのレスポンスのデータがうまく取得出来ませんでした");
-                }
 
                 // ======================================================
                 // 3日分のデータを1日分ごとにまとめてリストにする
                 var days = new List<DayForecast>();
-                for (int i = 0; i < dailyData.Time.Count; i++)
+                for (int i = 0; i < timeList.Count; i++)
                 {
-                    days.Add(new DayForecast(dailyData.Time[i], dailyData.WeatherCode[i], dailyData.TempMax[i], dailyData.TempMin[i], dailyData.PrecipProb[i]));
+                    days.Add(new DayForecast(timeList[i], weatherCodeList[i], tempMaxList[i], tempMaxList[i], precipProbList[i]));
                 }
                 Debug.WriteLine($"days:{days}");
                 return days;
