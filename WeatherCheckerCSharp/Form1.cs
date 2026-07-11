@@ -159,9 +159,14 @@ namespace WeatherCheckerCSharp
                 // GeoCodeAsyncから切り離してこっちで表示されるように修正
                 lblStatus.Text = $"「{cityName}」の検索結果がnullでした";
                 MessageBox.Show(error.Message);
-            }catch(HttpRequestException error)
+            }
+            catch(HttpRequestException error)
             {
                 MessageBox.Show($"通信エラーです！！！{error.Message}");
+            }
+            catch (JsonException error)
+            {
+                MessageBox.Show($"天気データの形式が想定と違います。{error.Message}");
             }
             finally
             {
@@ -177,12 +182,19 @@ namespace WeatherCheckerCSharp
                 // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
                 // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
                 string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={geoInfoPram.Latitude}&longitude={geoInfoPram.Longitude}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
-                string forecastJson = await http.GetStringAsync(forecastUrl);
-                // ForecastResponse型のデータにする
-                ForecastResponse? forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson);
-                // nullの可能性があるっぽい？
-                DailyData dailyData = forecastResponse.Daily;
+                string? forecastJson = await http.GetStringAsync(forecastUrl);
                 
+                // ForecastResponse型のデータにする
+                // InvalidOperationExceptionクラスの例外を投げる
+                // 引数以外の失敗で発生したときの例外らしい
+                ForecastResponse forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson) ?? throw new JsonException("天気予報APIのレスポンスを読み取れませんでした。");
+                // Dailyプロパティがあっても値がnullの可能性がある
+                DailyData? dailyData = forecastResponse.Daily;
+                if(dailyData is null)
+                {
+                    // TODO: この例外クラスでいいのだろうか？
+                    throw new JsonException("天気予報APIのレスポンスに daily がありませんでした。");
+                }
                 // ==================以下の部分はまだ例外の処理の実装メモがないよ====================
                 //Debug.WriteLine($"dailyData: {dailyData}");
                 List<double> tempMaxList = dailyData.TempMax;
