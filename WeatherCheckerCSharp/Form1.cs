@@ -198,10 +198,10 @@ namespace WeatherCheckerCSharp
                 // ==================以下の部分はまだ例外の処理の実装メモがないよ====================
                 //Debug.WriteLine($"dailyData: {dailyData}");
                 List<string>? timeList = dailyData.Time;
-                List<int> weatherCodeList = dailyData.WeatherCode;
+                List<int>? weatherCodeList = dailyData.WeatherCode;
                 List<double>? tempMaxList = dailyData.TempMax;
                 List<double>? tempMinList = dailyData.TempMin;
-                List<int> precipProbList = dailyData.PrecipProb;
+                List<int>? precipProbList = dailyData.PrecipProb;
 
                 if (timeList is null || weatherCodeList is null || tempMaxList is null || tempMinList is null || precipProbList is null)
                 {
