@@ -224,6 +224,7 @@ namespace WeatherCheckerCSharp
                 // ======================================================
                 // 3日分のデータを1日分ごとにまとめてリストにする
                 var days = new List<DayForecast>();
+                // TODO: もしかしたらfor文全体をtry-catchで囲んでNullReferenceExceptionをしたほうがいいかも？
                 for (int i = 0; i < timeList.Count; i++)
                 {
                     days.Add(new DayForecast(timeList[i], weatherCodeList[i], tempMaxList[i], tempMaxList[i], precipProbList[i]));
