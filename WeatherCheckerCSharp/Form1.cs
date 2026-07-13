@@ -340,5 +340,22 @@ namespace WeatherCheckerCSharp
 
         //};
 
+        // お気に入り登録処理
+        // TODO: おそらく、各自の環境のApplicationDataフォルダがあるパスを取得
+        //  "MyWeather", "favorites.json"とかとくっつけてFavPathに代入する
+        private static readonly string FavPath = Path.Combine(@"D:\Dev","MyWeather", "favorites.json");
+
+        // TODO: List<string>はなに？
+        private async Task SaveFavoritesAsync(List<string> favs)
+        {
+            // ディレクトリを作成する
+            Directory.CreateDirectory(Path.GetDirectoryName(FavPath));
+            // シリアライズをしてクラスからJSONに戻す
+            JsonSerializerOptions option = new JsonSerializerOptions { WriteIndented = true};
+            string json = jsonSerializer.Serialize(favs, option);
+            // パスを指定して非同期でファイルを読む
+            await File.WriteAllTextAsync(FavPath, json);
+        }
+        // LoadFavoritesAsync()を作成する
     }
 }
