@@ -344,6 +344,7 @@ namespace WeatherCheckerCSharp
         // お気に入り登録処理
         // TODO: おそらく、各自の環境のApplicationDataフォルダがあるパスを取得
         //  "MyWeather", "favorites.json"とかとくっつけてFavPathに代入する
+        // どうしてstaticなの？変数ってstaticにする意味はありますか？
         private static readonly string FavPath = Path.Combine(@"D:\Dev","MyWeather", "favorites.json");
 
         // TODO: List<string>はなに？👉️お気に入りの都市がstringで、それのList
