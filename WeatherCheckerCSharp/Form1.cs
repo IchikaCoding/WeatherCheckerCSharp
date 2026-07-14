@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Security.Policy;
 using System.Text.Json;
+//using System.IO;
 using System.Threading.Channels;
 using WeatherCheckerCSharp;
 using static System.Net.WebRequestMethods;
@@ -345,17 +346,43 @@ namespace WeatherCheckerCSharp
         //  "MyWeather", "favorites.json"とかとくっつけてFavPathに代入する
         private static readonly string FavPath = Path.Combine(@"D:\Dev","MyWeather", "favorites.json");
 
-        // TODO: List<string>はなに？
+        // TODO: List<string>はなに？👉️お気に入りの都市がstringで、それのList
         private async Task SaveFavoritesAsync(List<string> favs)
         {
-            // ディレクトリを作成する
+            // favorites.jsonというディレクトリを作成する（登録処理）
+            // TODO: FavPathがnull参照引数になっているらしい。でもFavPathは文字列では？
             Directory.CreateDirectory(Path.GetDirectoryName(FavPath));
             // シリアライズをしてクラスからJSONに戻す
+            // { WriteIndented = true}ってオブジェクト初期化子？👉️No!!
+            // WriteIndentedをtrueにすると、JSONを作成する時に、見やすいJSONになるらしい。（例：プロパティ名と値の間に空白を追加する。）
             JsonSerializerOptions option = new JsonSerializerOptions { WriteIndented = true};
-            string json = jsonSerializer.Serialize(favs, option);
+            // クラスからJSONデータへ変換する、
+            string json = JsonSerializer.Serialize(favs, option);
             // パスを指定して非同期でファイルを読む
-            await File.WriteAllTextAsync(FavPath, json);
+            // Fileは2種類選べるようになっていて曖昧。これは指定してあげたら治るかも
+            await System.IO.File.WriteAllTextAsync(FavPath, json);
         }
-        // LoadFavoritesAsync()を作成する
+        // LoadFavoritesAsync()を作成する（読み込み処理）
+        
+        private async Task<List<string>> LoadFavoritesAsync()
+        {
+            // ファイルがないなら、空のリストを返す
+            // ファイルの中身全て読んでJSON文字列にする
+            // JSONからListにして、もしnullなら新しいListを作成？
+            if (!System.IO.File.Exists(FavPath)){
+                return new List<string>();
+            }
+            string json = await System.IO.File.ReadAllTextAsync(FavPath);
+            // new()ってなんだろう？new List<string>()で空のリスト作れない？
+            // JsonSerializer.Deserializeは戻り値がTValue?👉非同期じゃない。null許容型だからnull合体演算子をつけておくのがいいっぽい
+            List<string> favList = JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
+            return favList;
+        }
+
+        //　2026/07/15からやること
+        // TODO: StreamReaderをSaveとLoadメソッドのなかで使って書き換えたい
+        // アプリ開いたらお気に入り登録した都市が取得できる処理を定義
+        // お気に入りボタンを押したらSaveFavoritesAsync()を実行する処理を定義する
+
     }
 }
