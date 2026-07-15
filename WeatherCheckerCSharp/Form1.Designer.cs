@@ -35,6 +35,7 @@
             linkLabel1 = new LinkLabel();
             linkLabel2 = new LinkLabel();
             button1 = new Button();
+            cmbFavorites = new ComboBox();
             SuspendLayout();
             // 
             // txtCity
@@ -103,11 +104,20 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
+            // cmbFavorites
+            // 
+            cmbFavorites.FormattingEnabled = true;
+            cmbFavorites.Location = new Point(58, 32);
+            cmbFavorites.Name = "cmbFavorites";
+            cmbFavorites.Size = new Size(121, 23);
+            cmbFavorites.TabIndex = 10;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(583, 450);
+            Controls.Add(cmbFavorites);
             Controls.Add(button1);
             Controls.Add(linkLabel2);
             Controls.Add(linkLabel1);
@@ -131,6 +141,7 @@
         private LinkLabel linkLabel1;
         private LinkLabel linkLabel2;
         private Button button1;
+        private ComboBox cmbFavorites;
         //private Label linkOpenMeteo;
     }
 }

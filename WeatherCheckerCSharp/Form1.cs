@@ -34,9 +34,14 @@ namespace WeatherCheckerCSharp
             Debug.WriteLine(new System.Diagnostics.ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories"));
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        // 非同期処理だけどTask型はLoadに登録できない。だからVoidにした
+        private async void Form1_Load(object sender, EventArgs e)
         {
-
+            List<string> favs = await LoadFavoritesAsync();
+            // 配列に直したお気に入りの都市たちを
+            // AddRange()はListの末尾に要素を追加できるやつ。
+            // コンボボックスの中に配列にして一気にお気に入りを追加
+            cmbFavorites.Items.AddRange(favs.ToArray());
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -161,7 +166,7 @@ namespace WeatherCheckerCSharp
                 lblStatus.Text = $"「{cityName}」の検索結果がnullでした";
                 MessageBox.Show(error.Message);
             }
-            catch(HttpRequestException error)
+            catch (HttpRequestException error)
             {
                 MessageBox.Show($"通信エラーです！！！{error.Message}");
             }
@@ -172,9 +177,9 @@ namespace WeatherCheckerCSharp
             finally
             {
                 btnSearch.Enabled = true;
-                
+
             }
-            
+
 
             async Task<List<DayForecast>> DayForecastAsync(GeoInfo geoInfoPram)
             {
@@ -184,14 +189,14 @@ namespace WeatherCheckerCSharp
                 // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
                 string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={geoInfoPram.Latitude}&longitude={geoInfoPram.Longitude}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
                 string? forecastJson = await http.GetStringAsync(forecastUrl);
-                
+
                 // ForecastResponse型のデータにする
                 // InvalidOperationExceptionクラスの例外を投げる
                 // 引数以外の失敗で発生したときの例外らしい
                 ForecastResponse forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson) ?? throw new JsonException("天気予報APIのレスポンスを読み取れませんでした。");
                 // Dailyプロパティがあっても値がnullの可能性がある
                 DailyData? dailyData = forecastResponse.Daily;
-                if(dailyData is null)
+                if (dailyData is null)
                 {
                     // TODO: この例外クラスでいいのだろうか？
                     throw new JsonException("天気予報APIのレスポンスに daily がありませんでした。");
@@ -208,13 +213,13 @@ namespace WeatherCheckerCSharp
                 {
                     throw new JsonException("天気予報APIのレスポンスに最高気温、もしくは最低気温のデータがありませんでした。");
                 }
-                
+
                 int count = timeList.Count;
-                if(count == 0)
+                if (count == 0)
                 {
                     throw new JsonException("天気予報APIのレスポンスの1日ごとのデータが取得出来ませんでした");
                 }
-                if(weatherCodeList.Count != count || tempMaxList.Count != count || tempMinList.Count != count || precipProbList.Count != count)
+                if (weatherCodeList.Count != count || tempMaxList.Count != count || tempMinList.Count != count || precipProbList.Count != count)
                 {
                     throw new JsonException("天気予報APIのレスポンスのデータがうまく取得出来ませんでした");
                 }
@@ -294,7 +299,7 @@ namespace WeatherCheckerCSharp
         {
             static int CharToInt(char c)
             {
-                if('0' <= c && c <= '9')
+                if ('0' <= c && c <= '9')
                 {
                     // しんぐるじゃないとだめっぽいのなぜ？
                     return c - '0';
@@ -304,7 +309,7 @@ namespace WeatherCheckerCSharp
                     Debug.WriteLine("入力値が0以上9以下を満たしません");
                     return -1;
                 }
-                
+
             }
             static int StringToInt(string str)
             {
@@ -312,7 +317,7 @@ namespace WeatherCheckerCSharp
                 foreach (char c in str)
                 {
                     int i = CharToInt(c);
-                    if(i == -1)
+                    if (i == -1)
                     {
                         return -1;
                     }
@@ -345,7 +350,7 @@ namespace WeatherCheckerCSharp
         // TODO: おそらく、各自の環境のApplicationDataフォルダがあるパスを取得
         //  "MyWeather", "favorites.json"とかとくっつけてFavPathに代入する
         // どうしてstaticなの？変数ってstaticにする意味はありますか？
-        private static readonly string FavPath = Path.Combine(@"D:\Dev","MyWeather", "favorites.json");
+        private static readonly string FavPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
 
         // TODO: List<string>はなに？👉️お気に入りの都市がstringで、それのList
         private async Task SaveFavoritesAsync(List<string> favs)
@@ -356,7 +361,7 @@ namespace WeatherCheckerCSharp
             // シリアライズをしてクラスからJSONに戻す
             // { WriteIndented = true}ってオブジェクト初期化子？👉️No!!
             // WriteIndentedをtrueにすると、JSONを作成する時に、見やすいJSONになるらしい。（例：プロパティ名と値の間に空白を追加する。）
-            JsonSerializerOptions option = new JsonSerializerOptions { WriteIndented = true};
+            JsonSerializerOptions option = new JsonSerializerOptions { WriteIndented = true };
             // クラスからJSONデータへ変換する、
             string json = JsonSerializer.Serialize(favs, option);
             // パスを指定して非同期でファイルを読む
@@ -364,13 +369,14 @@ namespace WeatherCheckerCSharp
             await System.IO.File.WriteAllTextAsync(FavPath, json);
         }
         // LoadFavoritesAsync()を作成する（読み込み処理）
-        
+
         private async Task<List<string>> LoadFavoritesAsync()
         {
             // ファイルがないなら、空のリストを返す
             // ファイルの中身全て読んでJSON文字列にする
             // JSONからListにして、もしnullなら新しいListを作成？
-            if (!System.IO.File.Exists(FavPath)){
+            if (!System.IO.File.Exists(FavPath))
+            {
                 return new List<string>();
             }
             string json = await System.IO.File.ReadAllTextAsync(FavPath);
@@ -384,6 +390,5 @@ namespace WeatherCheckerCSharp
         // TODO: StreamReaderをSaveとLoadメソッドのなかで使って書き換えたい
         // アプリ開いたらお気に入り登録した都市が取得できる処理を定義
         // お気に入りボタンを押したらSaveFavoritesAsync()を実行する処理を定義する
-
     }
 }
