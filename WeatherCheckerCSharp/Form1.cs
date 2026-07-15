@@ -386,6 +386,29 @@ namespace WeatherCheckerCSharp
             return favList;
         }
 
+        private async void btnFav_Click(object sender, EventArgs e)
+        {
+            // 都市名を綺麗に取得
+            // もうすでに入っている、nullだったら早期リターン
+            // コンボボックスの選択肢に追加
+            // 都市名を取得してそれをListにして保存処理を実行
+            string rawCityName = txtCity.Text;
+            string trimmedCityName = rawCityName.Trim();
+            // cmbFavorites.Items.Contains()　は戻り値bool
+            // TODO: MessageBoxでそれぞれ、何が出来ていないのか教えて上げるといいかも
+            if (string.IsNullOrEmpty(trimmedCityName) || cmbFavorites.Items.Contains(trimmedCityName))
+            {
+                return;
+            }
+            // TODO: 画面にしか登録していない。JSONに先に追加して、そこからコンボボックスを更新するといいかも
+            // 非同期処理を書くならtry-catchを書くといいかも！
+            cmbFavorites.Items.Add(trimmedCityName);
+            // 引数がList<string>。trimmedCityNameをListに追加してから渡したい
+            List<string> favList = await LoadFavoritesAsync();
+            favList.Add(trimmedCityName);
+            await SaveFavoritesAsync(favList);
+        }
+
         //　2026/07/15からやること
         // TODO: StreamReaderをSaveとLoadメソッドのなかで使って書き換えたい
         // アプリ開いたらお気に入り登録した都市が取得できる処理を定義

@@ -36,11 +36,12 @@
             linkLabel2 = new LinkLabel();
             button1 = new Button();
             cmbFavorites = new ComboBox();
+            btnFav = new Button();
             SuspendLayout();
             // 
             // txtCity
             // 
-            txtCity.Location = new Point(159, 122);
+            txtCity.Location = new Point(196, 125);
             txtCity.Name = "txtCity";
             txtCity.Size = new Size(229, 23);
             txtCity.TabIndex = 0;
@@ -112,11 +113,22 @@
             cmbFavorites.Size = new Size(121, 23);
             cmbFavorites.TabIndex = 10;
             // 
+            // btnFav
+            // 
+            btnFav.Location = new Point(113, 113);
+            btnFav.Name = "btnFav";
+            btnFav.Size = new Size(66, 46);
+            btnFav.TabIndex = 11;
+            btnFav.Text = "button2";
+            btnFav.UseVisualStyleBackColor = true;
+            btnFav.Click += btnFav_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(583, 450);
+            Controls.Add(btnFav);
             Controls.Add(cmbFavorites);
             Controls.Add(button1);
             Controls.Add(linkLabel2);
@@ -142,6 +154,7 @@
         private LinkLabel linkLabel2;
         private Button button1;
         private ComboBox cmbFavorites;
+        private Button btnFav;
         //private Label linkOpenMeteo;
     }
 }
