@@ -119,7 +119,7 @@
             btnFav.Name = "btnFav";
             btnFav.Size = new Size(66, 46);
             btnFav.TabIndex = 11;
-            btnFav.Text = "button2";
+            btnFav.Text = "お気に入りボタン♡";
             btnFav.UseVisualStyleBackColor = true;
             btnFav.Click += btnFav_Click;
             // 

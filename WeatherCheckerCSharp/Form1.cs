@@ -35,13 +35,29 @@ namespace WeatherCheckerCSharp
         }
 
         // 非同期処理だけどTask型はLoadに登録できない。だからVoidにした
+        // ファイルが壊れているかもしれない。読み込む権限がないかもしれない。読み込み失敗しているかもしれない
         private async void Form1_Load(object sender, EventArgs e)
         {
-            List<string> favs = await LoadFavoritesAsync();
-            // 配列に直したお気に入りの都市たちを
-            // AddRange()はListの末尾に要素を追加できるやつ。
-            // コンボボックスの中に配列にして一気にお気に入りを追加
-            cmbFavorites.Items.AddRange(favs.ToArray());
+            try
+            {
+                List<string> favs = await LoadFavoritesAsync();
+                // 配列に直したお気に入りの都市たちを
+                // AddRange()はListの末尾に要素を追加できるやつ。
+                // コンボボックスの中に配列にして一気にお気に入りを追加
+                cmbFavorites.Items.AddRange(favs.ToArray());
+            }
+            catch(JsonException error)
+            {
+                MessageBox.Show($"お気に入りファイルが壊れているため、読み込めません\n{error.Message}");
+            }
+            catch (UnauthorizedAccessException error)
+            {
+                MessageBox.Show($"お気に入りファイルを読み込む権限がありません\n{error.Message}");
+            }catch(IOException error)
+            {
+                MessageBox.Show($"お気に入りファイルの読み込み失敗しています\n{error.Message}");
+            }
+
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -350,6 +366,8 @@ namespace WeatherCheckerCSharp
         // TODO: おそらく、各自の環境のApplicationDataフォルダがあるパスを取得
         //  "MyWeather", "favorites.json"とかとくっつけてFavPathに代入する
         // どうしてstaticなの？変数ってstaticにする意味はありますか？
+        // 👉️staticの理由：Form1のインスタンスが複数作られても、同じFavPathを使用するよという意味。
+        // 更新出来ないようにreadonlyを使っている。
         private static readonly string FavPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
 
         // TODO: List<string>はなに？👉️お気に入りの都市がstringで、それのList
@@ -357,9 +375,15 @@ namespace WeatherCheckerCSharp
         {
             // favorites.jsonというディレクトリを作成する（登録処理）
             // TODO: FavPathがnull参照引数になっているらしい。でもFavPathは文字列では？
-            Directory.CreateDirectory(Path.GetDirectoryName(FavPath));
+            // 👉️Yes。Path.GetDirectoryName()の戻り値がstring?。nullの可能性もある
+            string? directoryPath = Path.GetDirectoryName(FavPath);
+            if(directoryPath is null)
+            {
+                throw new InvalidOperationException("お気に入りファイルの保存先が正しくありません");
+            }
+            Directory.CreateDirectory(directoryPath);
             // シリアライズをしてクラスからJSONに戻す
-            // { WriteIndented = true}ってオブジェクト初期化子？👉️No!!
+            // { WriteIndented = true}ってオブジェクト初期化子？👉️Yes!!!
             // WriteIndentedをtrueにすると、JSONを作成する時に、見やすいJSONになるらしい。（例：プロパティ名と値の間に空白を追加する。）
             JsonSerializerOptions option = new JsonSerializerOptions { WriteIndented = true };
             // クラスからJSONデータへ変換する、
@@ -383,7 +407,14 @@ namespace WeatherCheckerCSharp
             // new()ってなんだろう？new List<string>()で空のリスト作れない？
             // JsonSerializer.Deserializeは戻り値がTValue?👉非同期じゃない。null許容型だからnull合体演算子をつけておくのがいいっぽい
             List<string> favList = JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
-            return favList;
+            // TODO: `.Distinct(StringComparer.OrdinalIgnoreCase)`がわからない
+            // JSON手動で変更された時のために、ここにも要素チェックを入れておく
+            // TODO: 共通のメソッドにしておくと便利かも。
+            return favList
+                .Where(favItem => !string.IsNullOrWhiteSpace(favItem))
+                .Select(favItem => favItem.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
 
         private async void btnFav_Click(object sender, EventArgs e)
@@ -396,22 +427,66 @@ namespace WeatherCheckerCSharp
             string trimmedCityName = rawCityName.Trim();
             // cmbFavorites.Items.Contains()　は戻り値bool
             // TODO: MessageBoxでそれぞれ、何が出来ていないのか教えて上げるといいかも
-            if (string.IsNullOrEmpty(trimmedCityName) || cmbFavorites.Items.Contains(trimmedCityName))
+            // TODO: trimmedCityNameはnullじゃないのでは？null許容型にしますか？
+            if (string.IsNullOrWhiteSpace(trimmedCityName))
             {
+                MessageBox.Show("お気に入りに登録する都市名を入力してください");
+                // TODO: ここって早期リターンでいいの？例外throwしなくていいの？
                 return;
             }
-            // TODO: 画面にしか登録していない。JSONに先に追加して、そこからコンボボックスを更新するといいかも
-            // 非同期処理を書くならtry-catchを書くといいかも！
-            cmbFavorites.Items.Add(trimmedCityName);
-            // 引数がList<string>。trimmedCityNameをListに追加してから渡したい
-            List<string> favList = await LoadFavoritesAsync();
-            favList.Add(trimmedCityName);
-            await SaveFavoritesAsync(favList);
-        }
+            // ここでボタンを押せなくするらしい
+            btnFav.Enabled = false;
+            try
+            {
+                // 非同期処理の例外をキャッチしてみよう
+                // ここでJSONの内容を取得して、その中身から都市名の存在確認をしている。画面の都市名だけで判断していないのでGood！
+                List<string> favariteList = await LoadFavoritesAsync();
+                // どうして毎回受け取る変数を作り忘れるのだろうか？
+                // 大文字・小文字区別しないで比較したいときは`StringComparison.OrdinalIgnoreCase`でルールを追加する
+                bool alreadyExists = favariteList.Any(favarite => string.Equals(favarite, trimmedCityName, StringComparison.OrdinalIgnoreCase));
+                if (alreadyExists)
+                {
+                    MessageBox.Show($"{trimmedCityName}はすでにお気に入りに登録されています");
+                    return;
+                }
+                // Listに追加したい
+                favariteList.Add(trimmedCityName);
+                // 最新のお気に入りListを登録する
+                await SaveFavoritesAsync(favariteList);
+                // どうしてClear()？👉️クリアしてまた新しいバージョンを登録する。JSONがいつでもデータの参照先
+                cmbFavorites.Items.Clear();
+                cmbFavorites.Items.AddRange(favariteList.ToArray());
+                MessageBox.Show($"{trimmedCityName}をお気に入りに登録しました");
+            }
+            catch (JsonException)
+            {
+                MessageBox.Show("お気に入りファイルが壊れているため、読み込めませんでした");
+            }
+            // UnauthorizedAccessExceptionとIOException errorの例外もキャッチする
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("お気に入りファイルを保存する権限がありません。");
+            }catch(IOException error)
+            {
+                MessageBox.Show($"ファイルの読み書きに失敗しました。\n{error.Message}");
+            }
+            finally
+            {
+                btnFav.Enabled = true;
+            }
 
-        //　2026/07/15からやること
-        // TODO: StreamReaderをSaveとLoadメソッドのなかで使って書き換えたい
-        // アプリ開いたらお気に入り登録した都市が取得できる処理を定義
-        // お気に入りボタンを押したらSaveFavoritesAsync()を実行する処理を定義する
+
+            //if (string.IsNullOrWhiteSpace(trimmedCityName) || cmbFavorites.Items.Contains(trimmedCityName))
+            //{
+            //    return;
+            //}
+            //// TODO: 画面にしか登録していない。JSONに先に追加して、そこからコンボボックスを更新するといいかも
+            //// TODO: 非同期処理を書くならtry-catchを書くといいかも！
+            //// 引数がList<string>。trimmedCityNameをListに追加してから渡したい
+            //List<string> favList = await LoadFavoritesAsync();
+            //favList.Add(trimmedCityName);
+            //await SaveFavoritesAsync(favList);
+            //cmbFavorites.Items.Add(trimmedCityName);
+        }
     }
 }
