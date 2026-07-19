@@ -35,6 +35,7 @@
             linkLabel2 = new LinkLabel();
             cmbFavorites = new ComboBox();
             btnFav = new Button();
+            RemoveFavBtn = new Button();
             SuspendLayout();
             // 
             // txtCity
@@ -47,12 +48,13 @@
             // 
             // btnSearch
             // 
+            btnSearch.BackColor = Color.LightSkyBlue;
             btnSearch.Location = new Point(458, 122);
             btnSearch.Name = "btnSearch";
             btnSearch.Size = new Size(82, 28);
             btnSearch.TabIndex = 1;
             btnSearch.Text = "調べる";
-            btnSearch.UseVisualStyleBackColor = true;
+            btnSearch.UseVisualStyleBackColor = false;
             btnSearch.Click += btnSearch_Click;
             // 
             // lblStatus
@@ -102,11 +104,24 @@
             btnFav.UseVisualStyleBackColor = true;
             btnFav.Click += btnFav_Click;
             // 
+            // RemoveFavBtn
+            // 
+            RemoveFavBtn.BackColor = Color.Tomato;
+            RemoveFavBtn.Image = Properties.Resources.delete_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24;
+            RemoveFavBtn.Location = new Point(196, 23);
+            RemoveFavBtn.Name = "RemoveFavBtn";
+            RemoveFavBtn.Size = new Size(71, 39);
+            RemoveFavBtn.TabIndex = 12;
+            RemoveFavBtn.UseVisualStyleBackColor = false;
+            RemoveFavBtn.Click += RemoveFavBtn_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.White;
             ClientSize = new Size(703, 359);
+            Controls.Add(RemoveFavBtn);
             Controls.Add(btnFav);
             Controls.Add(cmbFavorites);
             Controls.Add(linkLabel2);
@@ -130,6 +145,7 @@
         private LinkLabel linkLabel2;
         private ComboBox cmbFavorites;
         private Button btnFav;
+        private Button RemoveFavBtn;
         //private Label linkOpenMeteo;
     }
 }

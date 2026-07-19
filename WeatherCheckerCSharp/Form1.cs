@@ -447,12 +447,49 @@ namespace WeatherCheckerCSharp
         {
             // 選択した値をtxtCity.Textに反映したい
             object? selectedCity = cmbFavorites.SelectedItem;
-            if(selectedCity is null)
+            if (selectedCity is null)
             {
                 return;
             }
             // objectをstringに明示的に変換
             txtCity.Text = (string)selectedCity;
+        }
+
+        private async void RemoveFavBtn_Click(object sender, EventArgs e)
+        {
+            // 選択した値をtxtCity.Textに反映したい
+            object? selectedCity = cmbFavorites.SelectedItem;
+            if (selectedCity is null)
+            {
+                return;
+            }
+            try
+            {
+               List<string> favariteList = await LoadFavoritesAsync();
+               bool isSuccessed =  favariteList.Remove((string)selectedCity);
+                if (isSuccessed)
+                {
+
+                    await SaveFavoritesAsync(favariteList);
+                }
+                cmbFavorites.Items.Clear();
+                cmbFavorites.Items.AddRange(favariteList.ToArray());
+                MessageBox.Show($"お気に入りから{selectedCity}を削除しました");
+            }
+            catch (JsonException)
+            {
+                MessageBox.Show("お気に入りファイルが壊れているため、読み込めませんでした");
+            }
+            // UnauthorizedAccessExceptionとIOException errorの例外もキャッチする
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("お気に入りファイルを保存する権限がありません。");
+            }
+            catch (IOException error)
+            {
+                MessageBox.Show($"ファイルの読み書きに失敗しました。\n{error.Message}");
+            }
+            
         }
     }
 }
