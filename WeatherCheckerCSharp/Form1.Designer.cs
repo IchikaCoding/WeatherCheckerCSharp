@@ -31,10 +31,8 @@
             txtCity = new TextBox();
             btnSearch = new Button();
             lblStatus = new Label();
-            txtRaw = new TextBox();
             linkLabel1 = new LinkLabel();
             linkLabel2 = new LinkLabel();
-            button1 = new Button();
             cmbFavorites = new ComboBox();
             btnFav = new Button();
             SuspendLayout();
@@ -60,25 +58,15 @@
             // lblStatus
             // 
             lblStatus.AutoSize = true;
-            lblStatus.Location = new Point(159, 186);
+            lblStatus.Location = new Point(159, 184);
             lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(38, 15);
+            lblStatus.Size = new Size(0, 15);
             lblStatus.TabIndex = 2;
-            lblStatus.Text = "label1";
-            // 
-            // txtRaw
-            // 
-            txtRaw.Location = new Point(159, 356);
-            txtRaw.Multiline = true;
-            txtRaw.Name = "txtRaw";
-            txtRaw.Size = new Size(100, 23);
-            txtRaw.TabIndex = 3;
-            txtRaw.TextChanged += txtRaw_TextChanged;
             // 
             // linkLabel1
             // 
             linkLabel1.AutoSize = true;
-            linkLabel1.Location = new Point(480, 359);
+            linkLabel1.Location = new Point(500, 237);
             linkLabel1.Name = "linkLabel1";
             linkLabel1.Size = new Size(60, 15);
             linkLabel1.TabIndex = 7;
@@ -88,22 +76,12 @@
             // linkLabel2
             // 
             linkLabel2.AutoSize = true;
-            linkLabel2.Location = new Point(475, 258);
+            linkLabel2.Location = new Point(500, 184);
             linkLabel2.Name = "linkLabel2";
             linkLabel2.Size = new Size(60, 15);
             linkLabel2.TabIndex = 8;
             linkLabel2.TabStop = true;
             linkLabel2.Text = "linkLabel2";
-            // 
-            // button1
-            // 
-            button1.Location = new Point(82, 253);
-            button1.Name = "button1";
-            button1.Size = new Size(75, 23);
-            button1.TabIndex = 9;
-            button1.Text = "button1";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
             // 
             // cmbFavorites
             // 
@@ -112,6 +90,7 @@
             cmbFavorites.Name = "cmbFavorites";
             cmbFavorites.Size = new Size(121, 23);
             cmbFavorites.TabIndex = 10;
+            cmbFavorites.SelectedIndexChanged += cmbFavorites_SelectedIndexChanged;
             // 
             // btnFav
             // 
@@ -127,13 +106,11 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(583, 450);
+            ClientSize = new Size(703, 359);
             Controls.Add(btnFav);
             Controls.Add(cmbFavorites);
-            Controls.Add(button1);
             Controls.Add(linkLabel2);
             Controls.Add(linkLabel1);
-            Controls.Add(txtRaw);
             Controls.Add(lblStatus);
             Controls.Add(btnSearch);
             Controls.Add(txtCity);
@@ -149,10 +126,8 @@
         private TextBox txtCity;
         private Button btnSearch;
         private Label lblStatus;
-        private TextBox txtRaw;
         private LinkLabel linkLabel1;
         private LinkLabel linkLabel2;
-        private Button button1;
         private ComboBox cmbFavorites;
         private Button btnFav;
         //private Label linkOpenMeteo;

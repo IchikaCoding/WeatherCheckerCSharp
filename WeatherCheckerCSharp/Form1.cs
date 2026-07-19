@@ -46,14 +46,15 @@ namespace WeatherCheckerCSharp
                 // コンボボックスの中に配列にして一気にお気に入りを追加
                 cmbFavorites.Items.AddRange(favs.ToArray());
             }
-            catch(JsonException error)
+            catch (JsonException error)
             {
                 MessageBox.Show($"お気に入りファイルが壊れているため、読み込めません\n{error.Message}");
             }
             catch (UnauthorizedAccessException error)
             {
                 MessageBox.Show($"お気に入りファイルを読み込む権限がありません\n{error.Message}");
-            }catch(IOException error)
+            }
+            catch (IOException error)
             {
                 MessageBox.Show($"お気に入りファイルの読み込み失敗しています\n{error.Message}");
             }
@@ -97,7 +98,6 @@ namespace WeatherCheckerCSharp
                 // TODO: EscapeDataString()はここにいるのか？いらないのかい？
                 // TODO: ここでnullが返ってくる可能性はないの？GeoResponse? geoString はnullの可能性がないと言うコードにした
                 string geoJson = await http.GetStringAsync(geoUrl);
-                txtRaw.Text = geoJson;
 
                 // optionでJSONとプロパティ名をクラスに合わせて修正してくれる
                 var option = new JsonSerializerOptions
@@ -310,57 +310,6 @@ namespace WeatherCheckerCSharp
         {
 
         }
-        // 例外処理を一旦書いてみようね
-        private void button1_Click(object sender, EventArgs e)
-        {
-            static int CharToInt(char c)
-            {
-                if ('0' <= c && c <= '9')
-                {
-                    // しんぐるじゃないとだめっぽいのなぜ？
-                    return c - '0';
-                }
-                else
-                {
-                    Debug.WriteLine("入力値が0以上9以下を満たしません");
-                    return -1;
-                }
-
-            }
-            static int StringToInt(string str)
-            {
-                int val = 0;
-                foreach (char c in str)
-                {
-                    int i = CharToInt(c);
-                    if (i == -1)
-                    {
-                        return -1;
-                    }
-                    val = val * 10 + i;
-                }
-                return val;
-            }
-            // 文字列もASCIIコードで数値として表すことも一応可能
-            int result = StringToInt("ichika");
-            int result2 = StringToInt("1234");
-            //char numString = (char)48;
-            //Debug.WriteLine($"numString:{numString}");
-
-            Debug.WriteLine($"result: {result}"); // result: 6272339
-            Debug.WriteLine($"result2: {result2}");
-        }
-
-        //        private void AddList()
-        //        {
-        //           public record DayForecast(string Date, int Code, double Max, double Min, int Pop);
-
-        //            List<DayForecast> days = new List<DayForecast>();
-        //                for (int i = 0; i<d.Time.Coount; i++){
-        //                days.Add()
-        //    }
-
-        //};
 
         // お気に入り登録処理
         // TODO: おそらく、各自の環境のApplicationDataフォルダがあるパスを取得
@@ -377,7 +326,7 @@ namespace WeatherCheckerCSharp
             // TODO: FavPathがnull参照引数になっているらしい。でもFavPathは文字列では？
             // 👉️Yes。Path.GetDirectoryName()の戻り値がstring?。nullの可能性もある
             string? directoryPath = Path.GetDirectoryName(FavPath);
-            if(directoryPath is null)
+            if (directoryPath is null)
             {
                 throw new InvalidOperationException("お気に入りファイルの保存先が正しくありません");
             }
@@ -413,6 +362,9 @@ namespace WeatherCheckerCSharp
             return favList
                 .Where(favItem => !string.IsNullOrWhiteSpace(favItem))
                 .Select(favItem => favItem.Trim())
+                // Distinct()とは？
+                // もとの LIST を書き換えないで、重複を取り除いてくれるらしい
+                // 英字の大文字と小文字を区別しない比較ルール
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
@@ -426,12 +378,13 @@ namespace WeatherCheckerCSharp
             string rawCityName = txtCity.Text;
             string trimmedCityName = rawCityName.Trim();
             // cmbFavorites.Items.Contains()　は戻り値bool
-            // TODO: MessageBoxでそれぞれ、何が出来ていないのか教えて上げるといいかも
-            // TODO: trimmedCityNameはnullじゃないのでは？null許容型にしますか？
+            // TODO: どうしてここで例外じゃなくて早期リターンなの？
+            // 👉️その場で解決したほうが例外投げるより早く解決できる
             if (string.IsNullOrWhiteSpace(trimmedCityName))
             {
                 MessageBox.Show("お気に入りに登録する都市名を入力してください");
                 // TODO: ここって早期リターンでいいの？例外throwしなくていいの？
+                // 早期リターンにしたほうが処理が早い、例外を出すとキャッチして、という手間がかかる。
                 return;
             }
             // ここでボタンを押せなくするらしい
@@ -466,7 +419,8 @@ namespace WeatherCheckerCSharp
             catch (UnauthorizedAccessException)
             {
                 MessageBox.Show("お気に入りファイルを保存する権限がありません。");
-            }catch(IOException error)
+            }
+            catch (IOException error)
             {
                 MessageBox.Show($"ファイルの読み書きに失敗しました。\n{error.Message}");
             }
@@ -487,6 +441,18 @@ namespace WeatherCheckerCSharp
             //favList.Add(trimmedCityName);
             //await SaveFavoritesAsync(favList);
             //cmbFavorites.Items.Add(trimmedCityName);
+        }
+        // TODO: ここからやる
+        private void cmbFavorites_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // 選択した値をtxtCity.Textに反映したい
+            object? selectedCity = cmbFavorites.SelectedItem;
+            if(selectedCity is null)
+            {
+                return;
+            }
+            // objectをstringに明示的に変換
+            txtCity.Text = (string)selectedCity;
         }
     }
 }
