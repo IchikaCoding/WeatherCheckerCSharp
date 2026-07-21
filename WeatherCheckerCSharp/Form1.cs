@@ -256,7 +256,7 @@ namespace WeatherCheckerCSharp
                 return days;
             }
 
-
+            // ここで結果3日分を表示
             void ShowDayForecast(List<DayForecast> dayForecasts)
             {
                 // AppendLineが使えるようになるっぽい
@@ -265,6 +265,8 @@ namespace WeatherCheckerCSharp
                 foreach (var day in dayForecasts)
                 {
                     (string emoji, string label) = Describe(day.Code);
+                    // ここの表示で横3列で表示できるようにする！
+                    // 3件未満のときに動かなくなってしまったらダメかも。修正ガンバ！
                     sb.AppendLine($"{day.Time} {emoji} {label}");
                     sb.AppendLine($"最高気温：{day.Max} 最低気温：{day.Min} 降水確率：{day.Prob}");
                 }
