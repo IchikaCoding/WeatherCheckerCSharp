@@ -36,11 +36,13 @@
             cmbFavorites = new ComboBox();
             btnFav = new Button();
             RemoveFavBtn = new Button();
+            label1 = new Label();
+            label2 = new Label();
             SuspendLayout();
             // 
             // txtCity
             // 
-            txtCity.Location = new Point(196, 125);
+            txtCity.Location = new Point(75, 126);
             txtCity.Name = "txtCity";
             txtCity.Size = new Size(229, 23);
             txtCity.TabIndex = 0;
@@ -49,9 +51,9 @@
             // btnSearch
             // 
             btnSearch.BackColor = Color.LightSkyBlue;
-            btnSearch.Location = new Point(458, 122);
+            btnSearch.Location = new Point(341, 103);
             btnSearch.Name = "btnSearch";
-            btnSearch.Size = new Size(82, 28);
+            btnSearch.Size = new Size(70, 46);
             btnSearch.TabIndex = 1;
             btnSearch.Text = "調べる";
             btnSearch.UseVisualStyleBackColor = false;
@@ -60,15 +62,17 @@
             // lblStatus
             // 
             lblStatus.AutoSize = true;
-            lblStatus.Location = new Point(159, 184);
+            lblStatus.BackColor = Color.RosyBrown;
+            lblStatus.Location = new Point(80, 272);
             lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(0, 15);
+            lblStatus.Size = new Size(55, 15);
             lblStatus.TabIndex = 2;
+            lblStatus.Text = "　　　　";
             // 
             // linkLabel1
             // 
             linkLabel1.AutoSize = true;
-            linkLabel1.Location = new Point(500, 237);
+            linkLabel1.Location = new Point(341, 395);
             linkLabel1.Name = "linkLabel1";
             linkLabel1.Size = new Size(60, 15);
             linkLabel1.TabIndex = 7;
@@ -78,7 +82,7 @@
             // linkLabel2
             // 
             linkLabel2.AutoSize = true;
-            linkLabel2.Location = new Point(500, 184);
+            linkLabel2.Location = new Point(75, 395);
             linkLabel2.Name = "linkLabel2";
             linkLabel2.Size = new Size(60, 15);
             linkLabel2.TabIndex = 8;
@@ -87,40 +91,63 @@
             // 
             // cmbFavorites
             // 
+            cmbFavorites.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbFavorites.FormattingEnabled = true;
-            cmbFavorites.Location = new Point(58, 32);
+            cmbFavorites.Location = new Point(75, 207);
             cmbFavorites.Name = "cmbFavorites";
-            cmbFavorites.Size = new Size(121, 23);
+            cmbFavorites.Size = new Size(149, 23);
             cmbFavorites.TabIndex = 10;
             cmbFavorites.SelectedIndexChanged += cmbFavorites_SelectedIndexChanged;
             // 
             // btnFav
             // 
-            btnFav.Location = new Point(113, 113);
+            btnFav.BackColor = Color.LightSkyBlue;
+            btnFav.Location = new Point(432, 103);
             btnFav.Name = "btnFav";
-            btnFav.Size = new Size(66, 46);
+            btnFav.Size = new Size(70, 46);
             btnFav.TabIndex = 11;
-            btnFav.Text = "お気に入りボタン♡";
-            btnFav.UseVisualStyleBackColor = true;
+            btnFav.Text = "保存";
+            btnFav.UseVisualStyleBackColor = false;
             btnFav.Click += btnFav_Click;
             // 
             // RemoveFavBtn
             // 
             RemoveFavBtn.BackColor = Color.Tomato;
             RemoveFavBtn.Image = Properties.Resources.delete_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24;
-            RemoveFavBtn.Location = new Point(196, 23);
+            RemoveFavBtn.Location = new Point(341, 184);
             RemoveFavBtn.Name = "RemoveFavBtn";
-            RemoveFavBtn.Size = new Size(71, 39);
+            RemoveFavBtn.Size = new Size(70, 46);
             RemoveFavBtn.TabIndex = 12;
             RemoveFavBtn.UseVisualStyleBackColor = false;
             RemoveFavBtn.Click += RemoveFavBtn_Click;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(75, 98);
+            label1.Name = "label1";
+            label1.Size = new Size(43, 15);
+            label1.TabIndex = 13;
+            label1.Text = "都市名";
+            label1.Click += label1_Click_1;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(75, 184);
+            label2.Name = "label2";
+            label2.Size = new Size(82, 15);
+            label2.TabIndex = 14;
+            label2.Text = "お気に入り都市";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(703, 359);
+            ClientSize = new Size(573, 444);
+            Controls.Add(label2);
+            Controls.Add(label1);
             Controls.Add(RemoveFavBtn);
             Controls.Add(btnFav);
             Controls.Add(cmbFavorites);
@@ -146,6 +173,8 @@
         private ComboBox cmbFavorites;
         private Button btnFav;
         private Button RemoveFavBtn;
+        private Label label1;
+        private Label label2;
         //private Label linkOpenMeteo;
     }
 }
