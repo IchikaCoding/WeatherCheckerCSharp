@@ -256,7 +256,7 @@ namespace WeatherCheckerCSharp
                 return days;
             }
 
-            // ここで結果3日分を表示
+
             void ShowDayForecast(List<DayForecast> dayForecasts)
             {
                 // AppendLineが使えるようになるっぽい
@@ -265,8 +265,6 @@ namespace WeatherCheckerCSharp
                 foreach (var day in dayForecasts)
                 {
                     (string emoji, string label) = Describe(day.Code);
-                    // ここの表示で横3列で表示できるようにする！
-                    // 3件未満のときに動かなくなってしまったらダメかも。修正ガンバ！
                     sb.AppendLine($"{day.Time} {emoji} {label}");
                     sb.AppendLine($"最高気温：{day.Max} 最低気温：{day.Min} 降水確率：{day.Prob}");
                 }
@@ -412,10 +410,7 @@ namespace WeatherCheckerCSharp
                 // どうしてClear()？👉️クリアしてまた新しいバージョンを登録する。JSONがいつでもデータの参照先
                 cmbFavorites.Items.Clear();
                 cmbFavorites.Items.AddRange(favariteList.ToArray());
-                // ここでコンボボックスの表示欄に今お気に入り登録した都市名を表示できる
-                cmbFavorites.Text = trimmedCityName;
                 MessageBox.Show($"{trimmedCityName}をお気に入りに登録しました");
-
             }
             catch (JsonException)
             {
@@ -471,8 +466,8 @@ namespace WeatherCheckerCSharp
             }
             try
             {
-                List<string> favariteList = await LoadFavoritesAsync();
-                bool isSuccessed = favariteList.Remove((string)selectedCity);
+               List<string> favariteList = await LoadFavoritesAsync();
+               bool isSuccessed =  favariteList.Remove((string)selectedCity);
                 if (isSuccessed)
                 {
 
@@ -483,9 +478,7 @@ namespace WeatherCheckerCSharp
                 MessageBox.Show($"お気に入りから{selectedCity}を削除しました");
                 // 都市入力欄だけリセットできそう👉️出来なかった
                 txtCity.Text = "";
-                // コンボボックスの選択を解除
-                cmbFavorites.SelectedIndex = -1;
-                cmbFavorites.Text = "";
+                
             }
             catch (JsonException)
             {
@@ -500,12 +493,7 @@ namespace WeatherCheckerCSharp
             {
                 MessageBox.Show($"ファイルの読み書きに失敗しました。\n{error.Message}");
             }
-
-        }
-
-        private void label1_Click_1(object sender, EventArgs e)
-        {
-
+            
         }
     }
 }

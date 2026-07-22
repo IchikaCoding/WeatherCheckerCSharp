@@ -38,6 +38,8 @@
             RemoveFavBtn = new Button();
             label1 = new Label();
             label2 = new Label();
+            richTextBox1 = new RichTextBox();
+            textBox1 = new TextBox();
             SuspendLayout();
             // 
             // txtCity
@@ -140,12 +142,31 @@
             label2.TabIndex = 14;
             label2.Text = "お気に入り都市";
             // 
+            // richTextBox1
+            // 
+            richTextBox1.BackColor = Color.MistyRose;
+            richTextBox1.Location = new Point(292, 272);
+            richTextBox1.Name = "richTextBox1";
+            richTextBox1.Size = new Size(248, 96);
+            richTextBox1.TabIndex = 15;
+            richTextBox1.Text = "";
+            // 
+            // textBox1
+            // 
+            textBox1.BackColor = Color.Salmon;
+            textBox1.Location = new Point(80, 324);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(100, 23);
+            textBox1.TabIndex = 16;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(573, 444);
+            ClientSize = new Size(587, 454);
+            Controls.Add(textBox1);
+            Controls.Add(richTextBox1);
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(RemoveFavBtn);
@@ -175,6 +196,8 @@
         private Button RemoveFavBtn;
         private Label label1;
         private Label label2;
+        private RichTextBox richTextBox1;
+        private TextBox textBox1;
         //private Label linkOpenMeteo;
     }
 }
