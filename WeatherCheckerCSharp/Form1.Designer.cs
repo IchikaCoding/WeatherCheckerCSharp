@@ -40,6 +40,17 @@
             label2 = new Label();
             richTextBox1 = new RichTextBox();
             textBox1 = new TextBox();
+            panel1 = new Panel();
+            lblForecast1 = new Label();
+            flowLayoutPanel1 = new FlowLayoutPanel();
+            panel2 = new Panel();
+            lblForecast2 = new Label();
+            panel3 = new Panel();
+            lblForecast3 = new Label();
+            panel1.SuspendLayout();
+            flowLayoutPanel1.SuspendLayout();
+            panel2.SuspendLayout();
+            panel3.SuspendLayout();
             SuspendLayout();
             // 
             // txtCity
@@ -65,7 +76,7 @@
             // 
             lblStatus.AutoSize = true;
             lblStatus.BackColor = Color.RosyBrown;
-            lblStatus.Location = new Point(80, 272);
+            lblStatus.Location = new Point(75, 255);
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new Size(55, 15);
             lblStatus.TabIndex = 2;
@@ -74,7 +85,7 @@
             // linkLabel1
             // 
             linkLabel1.AutoSize = true;
-            linkLabel1.Location = new Point(341, 395);
+            linkLabel1.Location = new Point(341, 458);
             linkLabel1.Name = "linkLabel1";
             linkLabel1.Size = new Size(60, 15);
             linkLabel1.TabIndex = 7;
@@ -84,7 +95,7 @@
             // linkLabel2
             // 
             linkLabel2.AutoSize = true;
-            linkLabel2.Location = new Point(75, 395);
+            linkLabel2.Location = new Point(75, 458);
             linkLabel2.Name = "linkLabel2";
             linkLabel2.Size = new Size(60, 15);
             linkLabel2.TabIndex = 8;
@@ -131,7 +142,6 @@
             label1.Size = new Size(43, 15);
             label1.TabIndex = 13;
             label1.Text = "都市名";
-            label1.Click += label1_Click_1;
             // 
             // label2
             // 
@@ -145,7 +155,7 @@
             // richTextBox1
             // 
             richTextBox1.BackColor = Color.MistyRose;
-            richTextBox1.Location = new Point(292, 272);
+            richTextBox1.Location = new Point(284, 544);
             richTextBox1.Name = "richTextBox1";
             richTextBox1.Size = new Size(248, 96);
             richTextBox1.TabIndex = 15;
@@ -154,17 +164,80 @@
             // textBox1
             // 
             textBox1.BackColor = Color.Salmon;
-            textBox1.Location = new Point(80, 324);
+            textBox1.Location = new Point(90, 617);
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(100, 23);
             textBox1.TabIndex = 16;
+            // 
+            // panel1
+            // 
+            panel1.Controls.Add(lblForecast1);
+            panel1.Location = new Point(3, 3);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(146, 151);
+            panel1.TabIndex = 17;
+            // 
+            // lblForecast1
+            // 
+            lblForecast1.AutoSize = true;
+            lblForecast1.Location = new Point(13, 14);
+            lblForecast1.Name = "lblForecast1";
+            lblForecast1.Size = new Size(38, 15);
+            lblForecast1.TabIndex = 0;
+            lblForecast1.Text = "label3";
+            // 
+            // flowLayoutPanel1
+            // 
+            flowLayoutPanel1.Controls.Add(panel1);
+            flowLayoutPanel1.Controls.Add(panel2);
+            flowLayoutPanel1.Controls.Add(panel3);
+            flowLayoutPanel1.Location = new Point(75, 289);
+            flowLayoutPanel1.Name = "flowLayoutPanel1";
+            flowLayoutPanel1.Size = new Size(457, 154);
+            flowLayoutPanel1.TabIndex = 18;
+            flowLayoutPanel1.Paint += flowLayoutPanel1_Paint;
+            // 
+            // panel2
+            // 
+            panel2.Controls.Add(lblForecast2);
+            panel2.Location = new Point(155, 3);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(146, 151);
+            panel2.TabIndex = 18;
+            // 
+            // lblForecast2
+            // 
+            lblForecast2.AutoSize = true;
+            lblForecast2.Location = new Point(19, 14);
+            lblForecast2.Name = "lblForecast2";
+            lblForecast2.Size = new Size(38, 15);
+            lblForecast2.TabIndex = 0;
+            lblForecast2.Text = "label4";
+            // 
+            // panel3
+            // 
+            panel3.Controls.Add(lblForecast3);
+            panel3.Location = new Point(307, 3);
+            panel3.Name = "panel3";
+            panel3.Size = new Size(146, 151);
+            panel3.TabIndex = 19;
+            // 
+            // lblForecast3
+            // 
+            lblForecast3.AutoSize = true;
+            lblForecast3.Location = new Point(14, 17);
+            lblForecast3.Name = "lblForecast3";
+            lblForecast3.Size = new Size(38, 15);
+            lblForecast3.TabIndex = 0;
+            lblForecast3.Text = "label5";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(587, 454);
+            ClientSize = new Size(587, 692);
+            Controls.Add(flowLayoutPanel1);
             Controls.Add(textBox1);
             Controls.Add(richTextBox1);
             Controls.Add(label2);
@@ -180,6 +253,13 @@
             Name = "Form1";
             Text = "Form1";
             Load += Form1_Load;
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
+            flowLayoutPanel1.ResumeLayout(false);
+            panel2.ResumeLayout(false);
+            panel2.PerformLayout();
+            panel3.ResumeLayout(false);
+            panel3.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -198,6 +278,13 @@
         private Label label2;
         private RichTextBox richTextBox1;
         private TextBox textBox1;
+        private Panel panel1;
+        private FlowLayoutPanel flowLayoutPanel1;
+        private Panel panel2;
+        private Panel panel3;
+        private Label lblForecast1;
+        private Label lblForecast2;
+        private Label lblForecast3;
         //private Label linkOpenMeteo;
     }
 }

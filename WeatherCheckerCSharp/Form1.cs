@@ -262,6 +262,20 @@ namespace WeatherCheckerCSharp
                 // AppendLineが使えるようになるっぽい
                 var sb = new System.Text.StringBuilder();
 
+                // ここでfor分を書く
+                // ラベルに一つずつ入れる処理を書く
+                // dayForecastsのインデックスに合わせて、ラベルに入れる
+                // 3つのラベルが入っている配列を作成する
+                System.Windows.Forms.Label[] forecastLabels = { lblForecast1, lblForecast2, lblForecast3 };
+
+                for (int i = 0; i < dayForecasts.Count; i++)
+                {
+                    // dayForecastsの要素を一つずつ取ってくる
+                    DayForecast day = dayForecasts[i];
+                    (string emoji, string label) = Describe(day.Code);
+                    string stringDayForecast = $"{day.Time}\n{emoji} {label}\n";
+                }
+
                 foreach (var day in dayForecasts)
                 {
                     (string emoji, string label) = Describe(day.Code);
@@ -274,7 +288,6 @@ namespace WeatherCheckerCSharp
                 // TODO:　thisってだれのこと？　ArgbのAって何が由来なの？　この色探しをするツールを探す
                 // ここはそもそもFrom1のクラス内。つまり、thisはForm1のインスタンスのこと
                 this.BackColor = Color.FromArgb(255, 247, 224);
-
             }
         }
 
@@ -466,8 +479,8 @@ namespace WeatherCheckerCSharp
             }
             try
             {
-               List<string> favariteList = await LoadFavoritesAsync();
-               bool isSuccessed =  favariteList.Remove((string)selectedCity);
+                List<string> favariteList = await LoadFavoritesAsync();
+                bool isSuccessed = favariteList.Remove((string)selectedCity);
                 if (isSuccessed)
                 {
 
@@ -478,7 +491,7 @@ namespace WeatherCheckerCSharp
                 MessageBox.Show($"お気に入りから{selectedCity}を削除しました");
                 // 都市入力欄だけリセットできそう👉️出来なかった
                 txtCity.Text = "";
-                
+
             }
             catch (JsonException)
             {
@@ -493,7 +506,12 @@ namespace WeatherCheckerCSharp
             {
                 MessageBox.Show($"ファイルの読み書きに失敗しました。\n{error.Message}");
             }
-            
+
+        }
+
+        private void flowLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }
