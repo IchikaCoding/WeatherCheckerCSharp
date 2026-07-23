@@ -21,17 +21,20 @@ namespace WeatherCheckerCSharp
             // リンクがクリックされたら、、
             // System.Diagnostics.Process.Start("起動したいアプリ")
             // 引数はsenderとeventカナ？
-            linkLabel1.LinkClicked += (s, e) => System.Diagnostics.Process.Start(
+            linkLabel1.LinkClicked += (s, e) => Process.Start(
                // ここで外部アプリを開く処理を設定している
                // シェルを使用する必要がある場合はtrueにするらしい
                // UseShellExecuteがtrueだと、シェルを使って処理を実行したいっていう設定？
-               new System.Diagnostics.ProcessStartInfo("https://open-meteo.com/") { UseShellExecute = true });
+               new ProcessStartInfo("https://open-meteo.com/") { UseShellExecute = true });
             linkLabel2.Text = "🌻いちかどんのGitHubのページ🌻";
             //linkLabel2.LinkClicked += (s, e) => System.Diagnostics.Process.Start(
             //    new System.Diagnostics.ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories") { UseShellExecute = true }
             //    );
-            linkLabel2.LinkClicked += (s, e) => System.Diagnostics.Process.Start("notepad");
-            Debug.WriteLine(new System.Diagnostics.ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories"));
+            // これはアプリ起動する場合のコード↓
+            // linkLabel3.LinkClicked += (s, e) =>  Process.Start("notepad");
+
+            linkLabel2.LinkClicked += (s, e) =>  Process.Start(new ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories") { UseShellExecute = true });
+            Debug.WriteLine(new ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories"));
         }
 
         // 非同期処理だけどTask型はLoadに登録できない。だからVoidにした
@@ -73,6 +76,7 @@ namespace WeatherCheckerCSharp
         // クリック系は戻り値voidでOK。それ以外はTaskらしい。イベントハンドラは非同期処理でもvoid
         private async void btnSearch_Click(object sender, EventArgs e)
         {
+            // TODO: 取得中はここでだそうかね？
             // JSON文字列がない、、、
             // この処理結果を代入しておく必要がある
             string cityName = txtCity.Text.Trim();
@@ -80,7 +84,6 @@ namespace WeatherCheckerCSharp
             // cityNameはstring?のほうがいいのかな？
             async Task<GeoInfo> GeoCodeAsync(string cityName)
             {
-                // TODO: 2026-07-10ここ
                 if (string.IsNullOrWhiteSpace(cityName))
                 {
                     throw new ArgumentException("都市名を入力してください");
@@ -162,6 +165,7 @@ namespace WeatherCheckerCSharp
                 MessageBox.Show("都市名を入力してください🙇‍");
                 return;
             }
+            // ボタン無効
             btnSearch.Enabled = false;
             lblStatus.Text = "取得中・・・";
             try
@@ -176,6 +180,9 @@ namespace WeatherCheckerCSharp
                 List<DayForecast> dayForecasts = await DayForecastAsync(geoInfo);
                 Debug.WriteLine($"dayForecasts: {dayForecasts}");
                 ShowDayForecast(dayForecasts);
+                // 成功したら、それをユーザーに通知する・
+                // TODO: この処理はShowDayForecastに入れたほうがいいかも。表示をまとめたい
+                lblStatus.Text = $"{cityName}の天気予報を取得しました";
             }
             catch (CityNotFoundException error)
             {
@@ -185,16 +192,17 @@ namespace WeatherCheckerCSharp
             }
             catch (HttpRequestException error)
             {
+                lblStatus.Text = "天気予報が取得出来ませんでした";
                 MessageBox.Show($"通信エラーです！！！{error.Message}");
             }
             catch (JsonException error)
             {
+                lblStatus.Text = "天気予報が取得出来ませんでした";
                 MessageBox.Show($"天気データの形式が想定と違います。{error.Message}");
             }
             finally
             {
                 btnSearch.Enabled = true;
-
             }
 
 
@@ -240,8 +248,7 @@ namespace WeatherCheckerCSharp
                 {
                     throw new JsonException("天気予報APIのレスポンスのデータがうまく取得出来ませんでした");
                 }
-                // 成功したら、それをユーザーに通知する
-                lblStatus.Text = $"{cityName}の天気予報を取得しました";
+                
 
 
                 // ======================================================
