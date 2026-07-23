@@ -240,8 +240,8 @@ namespace WeatherCheckerCSharp
                 {
                     throw new JsonException("天気予報APIのレスポンスのデータがうまく取得出来ませんでした");
                 }
-                // 最高気温。1日目：15℃, 2日目：10℃
-                lblStatus.Text = $"{cityName}：今日の最高 {tempMaxList[0]}℃ / 最低 {tempMinList[0]}℃";
+                // 成功したら、それをユーザーに通知する
+                lblStatus.Text = $"{cityName}の天気予報を取得しました";
 
 
                 // ======================================================
@@ -250,7 +250,7 @@ namespace WeatherCheckerCSharp
                 // TODO: もしかしたらfor文全体をtry-catchで囲んでNullReferenceExceptionをしたほうがいいかも？
                 for (int i = 0; i < timeList.Count; i++)
                 {
-                    days.Add(new DayForecast(timeList[i], weatherCodeList[i], tempMaxList[i], tempMaxList[i], precipProbList[i]));
+                    days.Add(new DayForecast(timeList[i], weatherCodeList[i], tempMaxList[i], tempMinList[i], precipProbList[i]));
                 }
                 Debug.WriteLine($"days:{days}");
                 return days;
