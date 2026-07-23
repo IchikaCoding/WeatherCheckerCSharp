@@ -38,8 +38,6 @@
             RemoveFavBtn = new Button();
             label1 = new Label();
             label2 = new Label();
-            richTextBox1 = new RichTextBox();
-            textBox1 = new TextBox();
             panel1 = new Panel();
             lblForecast1 = new Label();
             flowLayoutPanel1 = new FlowLayoutPanel();
@@ -152,23 +150,6 @@
             label2.TabIndex = 14;
             label2.Text = "お気に入り都市";
             // 
-            // richTextBox1
-            // 
-            richTextBox1.BackColor = Color.MistyRose;
-            richTextBox1.Location = new Point(284, 544);
-            richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(248, 96);
-            richTextBox1.TabIndex = 15;
-            richTextBox1.Text = "";
-            // 
-            // textBox1
-            // 
-            textBox1.BackColor = Color.Salmon;
-            textBox1.Location = new Point(90, 617);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(100, 23);
-            textBox1.TabIndex = 16;
-            // 
             // panel1
             // 
             panel1.Controls.Add(lblForecast1);
@@ -236,10 +217,8 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(587, 692);
+            ClientSize = new Size(587, 494);
             Controls.Add(flowLayoutPanel1);
-            Controls.Add(textBox1);
-            Controls.Add(richTextBox1);
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(RemoveFavBtn);
@@ -276,8 +255,6 @@
         private Button RemoveFavBtn;
         private Label label1;
         private Label label2;
-        private RichTextBox richTextBox1;
-        private TextBox textBox1;
         private Panel panel1;
         private FlowLayoutPanel flowLayoutPanel1;
         private Panel panel2;

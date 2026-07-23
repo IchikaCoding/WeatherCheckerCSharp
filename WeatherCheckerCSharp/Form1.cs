@@ -260,7 +260,7 @@ namespace WeatherCheckerCSharp
             void ShowDayForecast(List<DayForecast> dayForecasts)
             {
                 // AppendLineが使えるようになるっぽい
-                var sb = new System.Text.StringBuilder();
+                // var sb = new System.Text.StringBuilder();
 
                 // ここでfor分を書く
                 // ラベルに一つずつ入れる処理を書く
@@ -273,17 +273,19 @@ namespace WeatherCheckerCSharp
                     // dayForecastsの要素を一つずつ取ってくる
                     DayForecast day = dayForecasts[i];
                     (string emoji, string label) = Describe(day.Code);
-                    string stringDayForecast = $"{day.Time}\n{emoji} {label}\n";
+                    string stringDayForecast = $"{day.Time}\n{emoji} {label}\n 最高気温：{day.Max}℃\n 最低気温：{day.Min}℃\n 降水確率：{day.Prob}%";
+                    // ここでラベルに追加
+                    forecastLabels[i].Text = stringDayForecast;
                 }
 
-                foreach (var day in dayForecasts)
-                {
-                    (string emoji, string label) = Describe(day.Code);
-                    sb.AppendLine($"{day.Time} {emoji} {label}");
-                    sb.AppendLine($"最高気温：{day.Max} 最低気温：{day.Min} 降水確率：{day.Prob}");
-                }
+                // foreach (var day in dayForecasts)
+                // {
+                //     (string emoji, string label) = Describe(day.Code);
+                //     sb.AppendLine($"{day.Time} {emoji} {label}");
+                //     sb.AppendLine($"最高気温：{day.Max} 最低気温：{day.Min} 降水確率：{day.Prob}");
+                // }
                 // sbはToString()で文字列として表示できるらしい
-                lblStatus.Text = sb.ToString();
+                // lblStatus.Text = sb.ToString();
                 //this.BackColor = days[0].Code == 0 ? Color.FromArgb(255, 247, 224): Color.FromArgb(232, 238, 245);
                 // TODO:　thisってだれのこと？　ArgbのAって何が由来なの？　この色探しをするツールを探す
                 // ここはそもそもFrom1のクラス内。つまり、thisはForm1のインスタンスのこと
