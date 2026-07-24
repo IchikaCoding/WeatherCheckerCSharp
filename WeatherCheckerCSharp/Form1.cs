@@ -246,7 +246,7 @@ namespace WeatherCheckerCSharp
                 }
 
                 // 最大の日付を変数にしておくとこれだけ修正したら変更しやすい
-                const int maxForecastDays = 3;
+                const int MaxForecastDays = 3;
                 int count = timeList.Count;
 
                 if (count == 0)
@@ -258,9 +258,9 @@ namespace WeatherCheckerCSharp
                     throw new JsonException("天気予報APIのレスポンスのデータがうまく取得出来ませんでした");
                 }
                 
-                if(count < maxForecastDays)
+                if(count < MaxForecastDays)
                 {
-                    throw new JsonException($"天気予報は{maxForecastDays}日分を想定していますが、{count}日分で{maxForecastDays}日分に足りませんでした");
+                    throw new JsonException($"天気予報は{MaxForecastDays}日分を想定していますが、{count}日分で{MaxForecastDays}日分に足りませんでした");
                 }
                 
 
@@ -269,7 +269,7 @@ namespace WeatherCheckerCSharp
                 // 3日分のデータを1日分ごとにまとめてリストにする
                 var days = new List<DayForecast>();
                 // TODO: もしかしたらfor文全体をtry-catchで囲んでNullReferenceExceptionをしたほうがいいかも？
-                for (int i = 0; i < maxForecastDays; i++)
+                for (int i = 0; i < MaxForecastDays; i++)
                 {
                     days.Add(new DayForecast(timeList[i], weatherCodeList[i], tempMaxList[i], tempMinList[i], precipProbList[i]));
                 }
