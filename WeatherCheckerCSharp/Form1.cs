@@ -511,17 +511,27 @@ namespace WeatherCheckerCSharp
             object? selectedCity = cmbFavorites.SelectedItem;
             if (selectedCity is null)
             {
+                MessageBox.Show("削除するお気に入り都市を選択してください。");
                 return;
             }
             try
             {
+                // favariteListはJSONデータ
                 List<string> favariteList = await LoadFavoritesAsync();
-                bool isSuccessed = favariteList.Remove((string)selectedCity);
-                if (isSuccessed)
+                bool wasRemoved = favariteList.Remove((string)selectedCity);
+                // もしJSONにお気に入りがなかったら存在しませんっていって早期リターンする
+                if (!wasRemoved)
                 {
-
-                    await SaveFavoritesAsync(favariteList);
+                    // 保存済みから見つからない。更新しておきますと言っておく
+                    MessageBox.Show($"{selectedCity}はJSONデータのお気に入りから見つかりませんでした。" + "\n コンボボックスの一覧を更新しておきます。");
+                    // コンボボックスをクリア
+                    cmbFavorites.Items.Clear();
+                    cmbFavorites.Items.AddRange(favariteList.ToArray());
+                    // コンボボックスに新しいバージョンのJSONを表示
+                    return;
                 }
+
+                await SaveFavoritesAsync(favariteList);
                 cmbFavorites.Items.Clear();
                 cmbFavorites.Items.AddRange(favariteList.ToArray());
                 MessageBox.Show($"お気に入りから{selectedCity}を削除しました");
