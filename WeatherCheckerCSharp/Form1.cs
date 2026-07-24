@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection.Emit;
 using System.Security.Policy;
 using System.Text.Json;
@@ -110,8 +111,9 @@ namespace WeatherCheckerCSharp
                 };
                 // デシリアライズするとrecordの型にはめる事が可能（？）
                 // TODO: GeoResponseはnullが入る可能性ある？👉️例外に変えたからnullにならない
-                // TODO: どうしてInvalidOperationExceptionの例外を使用したの？
-                GeoResponse geoString = JsonSerializer.Deserialize<GeoResponse>(geoJson, option) ?? throw new InvalidOperationException("位置情報APIのレスポンスを読み取れませんでした。");
+                // どうしてInvalidOperationExceptionの例外を使用したの？
+                // 👉️JSONからクラスに変換する時の例外は、JSONExceptionにした
+                GeoResponse geoString = JsonSerializer.Deserialize<GeoResponse>(geoJson, option) ?? throw new JsonException("位置情報APIのレスポンスを読み取れませんでした。");
 
                 // Debug.WriteLine($"geoString:{geoString}");
 
@@ -208,11 +210,15 @@ namespace WeatherCheckerCSharp
 
             async Task<List<DayForecast>> DayForecastAsync(GeoInfo geoInfoPram)
             {
+                // 文化によって小数点の表し方が異なるらしい。
+                // それによってパラメーターを変えないために文字列にして`CultureInfo.InvariantCulture`を使用してみた
+                string latitudeText = geoInfoPram.Latitude.ToString(CultureInfo.InvariantCulture);
+                string longitudeText = geoInfoPram.Longitude.ToString(CultureInfo.InvariantCulture);
                 // 3日分取得
                 // URLのパラメーター部分は最初?でその後は＆で続ける
                 // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
                 // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
-                string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={geoInfoPram.Latitude}&longitude={geoInfoPram.Longitude}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
+                string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={latitudeText}&longitude={latitudeText}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
                 string? forecastJson = await http.GetStringAsync(forecastUrl);
 
                 // ForecastResponse型のデータにする
@@ -239,7 +245,10 @@ namespace WeatherCheckerCSharp
                     throw new JsonException("天気予報APIのレスポンスに最高気温、もしくは最低気温のデータがありませんでした。");
                 }
 
+                // 最大の日付を変数にしておくとこれだけ修正したら変更しやすい
+                const int maxForecastDays = 3;
                 int count = timeList.Count;
+
                 if (count == 0)
                 {
                     throw new JsonException("天気予報APIのレスポンスの1日ごとのデータが取得出来ませんでした");
@@ -249,13 +258,18 @@ namespace WeatherCheckerCSharp
                     throw new JsonException("天気予報APIのレスポンスのデータがうまく取得出来ませんでした");
                 }
                 
+                if(count < maxForecastDays)
+                {
+                    throw new JsonException($"天気予報は{maxForecastDays}日分を想定していますが、{count}日分で{maxForecastDays}日分に足りませんでした");
+                }
+                
 
 
                 // ======================================================
                 // 3日分のデータを1日分ごとにまとめてリストにする
                 var days = new List<DayForecast>();
                 // TODO: もしかしたらfor文全体をtry-catchで囲んでNullReferenceExceptionをしたほうがいいかも？
-                for (int i = 0; i < timeList.Count; i++)
+                for (int i = 0; i < maxForecastDays; i++)
                 {
                     days.Add(new DayForecast(timeList[i], weatherCodeList[i], tempMaxList[i], tempMinList[i], precipProbList[i]));
                 }
@@ -269,6 +283,19 @@ namespace WeatherCheckerCSharp
                 // AppendLineが使えるようになるっぽい
                 // var sb = new System.Text.StringBuilder();
 
+                // try
+                // {
+                //     // Listの長さが3件以外だったら例外
+                // if(dayForecasts.Count() != 3)
+                // {
+                //     throw new IndexOutOfRangeException();
+                // }
+                // }
+                // catch(IndexOutOfRangeException error)
+                // {
+                //     MessageBox.Show(error.Message);
+                // }
+                
                 // ここでfor分を書く
                 // ラベルに一つずつ入れる処理を書く
                 // dayForecastsのインデックスに合わせて、ラベルに入れる
