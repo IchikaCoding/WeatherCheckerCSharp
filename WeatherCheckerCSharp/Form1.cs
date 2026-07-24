@@ -507,6 +507,7 @@ namespace WeatherCheckerCSharp
 
         private async void RemoveFavBtn_Click(object sender, EventArgs e)
         {
+            RemoveFavBtn.Enabled = false;
             // 選択した値をtxtCity.Textに反映したい
             object? selectedCity = cmbFavorites.SelectedItem;
             if (selectedCity is null)
@@ -552,7 +553,10 @@ namespace WeatherCheckerCSharp
             {
                 MessageBox.Show($"ファイルの読み書きに失敗しました。\n{error.Message}");
             }
-
+            finally
+            {
+                RemoveFavBtn.Enabled = true;
+            }
         }
 
         private void flowLayoutPanel1_Paint(object sender, PaintEventArgs e)
