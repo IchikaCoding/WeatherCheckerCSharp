@@ -220,7 +220,7 @@ namespace WeatherCheckerCSharp
                 // URLのパラメーター部分は最初?でその後は＆で続ける
                 // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
                 // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
-                string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={latitudeText}&longitude={latitudeText}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
+                string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={latitudeText}&longitude={longitudeText}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
                 string? forecastJson = await http.GetStringAsync(forecastUrl);
 
                 // ForecastResponse型のデータにする
