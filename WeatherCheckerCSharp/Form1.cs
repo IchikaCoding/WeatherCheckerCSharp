@@ -180,7 +180,7 @@ namespace WeatherCheckerCSharp
                 {
                     return;
                 }
-                List<DayForecast> dayForecasts = await DayForecastAsync(geoInfo);
+                List<DayForecast> dayForecasts = await weatherApiClient.DayForecastAsync(geoInfo);
                 Debug.WriteLine($"dayForecasts: {dayForecasts}");
                 ShowDayForecast(dayForecasts);
                 // 成功したら、それをユーザーに通知する・
@@ -209,75 +209,75 @@ namespace WeatherCheckerCSharp
             }
 
 
-            async Task<List<DayForecast>> DayForecastAsync(GeoInfo geoInfoPram)
-            {
-                // 文化によって小数点の表し方が異なるらしい。
-                // それによってパラメーターを変えないために文字列にして`CultureInfo.InvariantCulture`を使用してみた
-                string latitudeText = geoInfoPram.Latitude.ToString(CultureInfo.InvariantCulture);
-                string longitudeText = geoInfoPram.Longitude.ToString(CultureInfo.InvariantCulture);
-                Console.WriteLine("latitudeText: " + latitudeText);
-                // 3日分取得
-                // URLのパラメーター部分は最初?でその後は＆で続ける
-                // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
-                // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
-                string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={latitudeText}&longitude={longitudeText}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
-                string? forecastJson = await http.GetStringAsync(forecastUrl);
+            // async Task<List<DayForecast>> DayForecastAsync(GeoInfo geoInfoPram)
+            // {
+            //     // 文化によって小数点の表し方が異なるらしい。
+            //     // それによってパラメーターを変えないために文字列にして`CultureInfo.InvariantCulture`を使用してみた
+            //     string latitudeText = geoInfoPram.Latitude.ToString(CultureInfo.InvariantCulture);
+            //     string longitudeText = geoInfoPram.Longitude.ToString(CultureInfo.InvariantCulture);
+            //     Console.WriteLine("latitudeText: " + latitudeText);
+            //     // 3日分取得
+            //     // URLのパラメーター部分は最初?でその後は＆で続ける
+            //     // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
+            //     // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
+            //     string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={latitudeText}&longitude={longitudeText}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
+            //     string? forecastJson = await http.GetStringAsync(forecastUrl);
 
-                // ForecastResponse型のデータにする
-                // InvalidOperationExceptionクラスの例外を投げる
-                // 引数以外の失敗で発生したときの例外らしい
-                ForecastResponse forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson) ?? throw new JsonException("天気予報APIのレスポンスを読み取れませんでした。");
-                // Dailyプロパティがあっても値がnullの可能性がある
-                DailyData? dailyData = forecastResponse.Daily;
-                if (dailyData is null)
-                {
-                    // TODO: この例外クラスでいいのだろうか？
-                    throw new JsonException("天気予報APIのレスポンスに daily がありませんでした。");
-                }
-                // ==================以下の部分はまだ例外の処理の実装メモがないよ====================
-                //Debug.WriteLine($"dailyData: {dailyData}");
-                List<string>? timeList = dailyData.Time;
-                List<int>? weatherCodeList = dailyData.WeatherCode;
-                List<double>? tempMaxList = dailyData.TempMax;
-                List<double>? tempMinList = dailyData.TempMin;
-                List<int>? precipProbList = dailyData.PrecipProb;
+            //     // ForecastResponse型のデータにする
+            //     // InvalidOperationExceptionクラスの例外を投げる
+            //     // 引数以外の失敗で発生したときの例外らしい
+            //     ForecastResponse forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson) ?? throw new JsonException("天気予報APIのレスポンスを読み取れませんでした。");
+            //     // Dailyプロパティがあっても値がnullの可能性がある
+            //     DailyData? dailyData = forecastResponse.Daily;
+            //     if (dailyData is null)
+            //     {
+            //         // TODO: この例外クラスでいいのだろうか？
+            //         throw new JsonException("天気予報APIのレスポンスに daily がありませんでした。");
+            //     }
+            //     // ==================以下の部分はまだ例外の処理の実装メモがないよ====================
+            //     //Debug.WriteLine($"dailyData: {dailyData}");
+            //     List<string>? timeList = dailyData.Time;
+            //     List<int>? weatherCodeList = dailyData.WeatherCode;
+            //     List<double>? tempMaxList = dailyData.TempMax;
+            //     List<double>? tempMinList = dailyData.TempMin;
+            //     List<int>? precipProbList = dailyData.PrecipProb;
 
-                if (timeList is null || weatherCodeList is null || tempMaxList is null || tempMinList is null || precipProbList is null)
-                {
-                    throw new JsonException("天気予報APIのレスポンスに最高気温、もしくは最低気温のデータがありませんでした。");
-                }
+            //     if (timeList is null || weatherCodeList is null || tempMaxList is null || tempMinList is null || precipProbList is null)
+            //     {
+            //         throw new JsonException("天気予報APIのレスポンスに最高気温、もしくは最低気温のデータがありませんでした。");
+            //     }
 
-                // 最大の日付を変数にしておくとこれだけ修正したら変更しやすい
-                const int MaxForecastDays = 3;
-                int count = timeList.Count;
+            //     // 最大の日付を変数にしておくとこれだけ修正したら変更しやすい
+            //     const int MaxForecastDays = 3;
+            //     int count = timeList.Count;
 
-                if (count == 0)
-                {
-                    throw new JsonException("天気予報APIのレスポンスの1日ごとのデータが取得出来ませんでした");
-                }
-                if (weatherCodeList.Count != count || tempMaxList.Count != count || tempMinList.Count != count || precipProbList.Count != count)
-                {
-                    throw new JsonException("天気予報APIのレスポンスのデータがうまく取得出来ませんでした");
-                }
+            //     if (count == 0)
+            //     {
+            //         throw new JsonException("天気予報APIのレスポンスの1日ごとのデータが取得出来ませんでした");
+            //     }
+            //     if (weatherCodeList.Count != count || tempMaxList.Count != count || tempMinList.Count != count || precipProbList.Count != count)
+            //     {
+            //         throw new JsonException("天気予報APIのレスポンスのデータがうまく取得出来ませんでした");
+            //     }
                 
-                if(count < MaxForecastDays)
-                {
-                    throw new JsonException($"天気予報は{MaxForecastDays}日分を想定していますが、{count}日分で{MaxForecastDays}日分に足りませんでした");
-                }
+            //     if(count < MaxForecastDays)
+            //     {
+            //         throw new JsonException($"天気予報は{MaxForecastDays}日分を想定していますが、{count}日分で{MaxForecastDays}日分に足りませんでした");
+            //     }
                 
 
 
-                // ======================================================
-                // 3日分のデータを1日分ごとにまとめてリストにする
-                var days = new List<DayForecast>();
-                // TODO: もしかしたらfor文全体をtry-catchで囲んでNullReferenceExceptionをしたほうがいいかも？
-                for (int i = 0; i < MaxForecastDays; i++)
-                {
-                    days.Add(new DayForecast(timeList[i], weatherCodeList[i], tempMaxList[i], tempMinList[i], precipProbList[i]));
-                }
-                Debug.WriteLine($"days:{days}");
-                return days;
-            }
+            //     // ======================================================
+            //     // 3日分のデータを1日分ごとにまとめてリストにする
+            //     var days = new List<DayForecast>();
+            //     // TODO: もしかしたらfor文全体をtry-catchで囲んでNullReferenceExceptionをしたほうがいいかも？
+            //     for (int i = 0; i < MaxForecastDays; i++)
+            //     {
+            //         days.Add(new DayForecast(timeList[i], weatherCodeList[i], tempMaxList[i], tempMinList[i], precipProbList[i]));
+            //     }
+            //     Debug.WriteLine($"days:{days}");
+            //     return days;
+            // }
 
 
             void ShowDayForecast(List<DayForecast> dayForecasts)
@@ -369,6 +369,7 @@ namespace WeatherCheckerCSharp
         // どうしてstaticなの？変数ってstaticにする意味はありますか？
         // 👉️staticの理由：Form1のインスタンスが複数作られても、同じFavPathを使用するよという意味。
         // 更新出来ないようにreadonlyを使っている。
+        // TODO: ユーザーが保存先を選べる機能を作る
         private static readonly string FavPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
 
         // TODO: List<string>はなに？👉️お気に入りの都市がstringで、それのList
@@ -391,6 +392,7 @@ namespace WeatherCheckerCSharp
             string json = JsonSerializer.Serialize(favs, option);
             // パスを指定して非同期でファイルを読む
             // Fileは2種類選べるようになっていて曖昧。これは指定してあげたら治るかも
+            // TODO: ここでJSON上書きをしている。FavoriteRepositoryを作る時に一時ファイルに保存したりして修正してみたい
             await System.IO.File.WriteAllTextAsync(FavPath, json);
         }
         // LoadFavoritesAsync()を作成する（読み込み処理）
