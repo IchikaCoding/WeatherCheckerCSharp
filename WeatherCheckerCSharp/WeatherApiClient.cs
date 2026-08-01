@@ -13,7 +13,8 @@ public class WeatherApiClient{
             // Webにアクセスするためのインスタンス
             private static readonly HttpClient http = new HttpClient();
 
-            public async Task<List<GeoResult>?> GetGeoResultsListAsync(string cityName)
+            // この処理は内部でしか使わない。だからprivateにしておこう
+            private async Task<List<GeoResult>?> GetGeoResultsListAsync(string cityName)
              {
                 // GeoResponseを受ける
                 // URLで都市名で検索する
@@ -58,7 +59,7 @@ public class WeatherApiClient{
                 //// 出力：geoResults: 
                 //Debug.WriteLine($"geoResults: {geoResults}");
              }
-             
+
             // 非同期処理＋recordでちょっと壁高めかも
             // cityNameはstring?のほうがいいのかな？
             public async Task<GeoInfo> GeoCodeAsync(string cityName)
@@ -118,7 +119,7 @@ public class WeatherApiClient{
                 if (geoResults is null || geoResults.Count == 0)
                 {
                     // ここは例外に直す👉️CityNotFoundException
-                    throw new CityNotFoundException($"「{cityName}」の検索結果がnullでした");
+                    throw new CityNotFoundException($"「{cityName}」の検索結果がありませんでした");
                 }
                 // Listの最初の要素は0だよ
                 GeoResult geoFirstItem = geoResults[0];
