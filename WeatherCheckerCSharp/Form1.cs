@@ -38,6 +38,7 @@ namespace WeatherCheckerCSharp
             Debug.WriteLine(new ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories"));
         }
 
+        private readonly WeatherApiClient weatherApiClient = new WeatherApiClient();
         // 非同期処理だけどTask型はLoadに登録できない。だからVoidにした
         // ファイルが壊れているかもしれない。読み込む権限がないかもしれない。読み込み失敗しているかもしれない
         private async void Form1_Load(object sender, EventArgs e)
@@ -174,7 +175,7 @@ namespace WeatherCheckerCSharp
             {
                 // GeoCodeAsyncで取得した戻り値をawait して実行
                 // Nullじゃなかった場合、例外を返す
-                GeoInfo? geoInfo = await GeoCodeAsync(cityName);
+                GeoInfo? geoInfo = await weatherApiClient.GeoCodeAsync(cityName);
                 if (geoInfo is null)
                 {
                     return;
@@ -214,6 +215,7 @@ namespace WeatherCheckerCSharp
                 // それによってパラメーターを変えないために文字列にして`CultureInfo.InvariantCulture`を使用してみた
                 string latitudeText = geoInfoPram.Latitude.ToString(CultureInfo.InvariantCulture);
                 string longitudeText = geoInfoPram.Longitude.ToString(CultureInfo.InvariantCulture);
+                Console.WriteLine("latitudeText: " + latitudeText);
                 // 3日分取得
                 // URLのパラメーター部分は最初?でその後は＆で続ける
                 // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
@@ -507,7 +509,6 @@ namespace WeatherCheckerCSharp
 
         private async void RemoveFavBtn_Click(object sender, EventArgs e)
         {
-            RemoveFavBtn.Enabled = false;
             // 選択した値をtxtCity.Textに反映したい
             object? selectedCity = cmbFavorites.SelectedItem;
             if (selectedCity is null)
@@ -515,6 +516,8 @@ namespace WeatherCheckerCSharp
                 MessageBox.Show("削除するお気に入り都市を選択してください。");
                 return;
             }
+            // ボタン無効化はtryの直前にしないとfinallyが実行されない可能性があるらしい💦
+            RemoveFavBtn.Enabled = false;
             try
             {
                 // favariteListはJSONデータ
