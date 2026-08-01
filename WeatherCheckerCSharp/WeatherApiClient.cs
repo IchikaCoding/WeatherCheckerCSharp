@@ -12,15 +12,9 @@ public class WeatherApiClient{
             // HTTPクライアントを使用するとGetStringAsyncが使えて，渡されたデータ（ＪＳＯＮ）を文字列として受け取ることができる
             // Webにアクセスするためのインスタンス
             private static readonly HttpClient http = new HttpClient();
-            // 非同期処理＋recordでちょっと壁高めかも
-            // cityNameはstring?のほうがいいのかな？
-            public async Task<GeoInfo> GeoCodeAsync(string cityName)
-            
-            {
-                if (string.IsNullOrWhiteSpace(cityName))
-                {
-                    throw new ArgumentException("都市名を入力してください");
-                }
+
+            public async Task<List<GeoResult>?> GetGeoResultsListAsync(string cityName)
+             {
                 // GeoResponseを受ける
                 // URLで都市名で検索する
                 // URLの作り方がわからない。非同期処理がGood
@@ -45,9 +39,9 @@ public class WeatherApiClient{
                 // TODO: GeoResponseはnullが入る可能性ある？👉️例外に変えたからnullにならない
                 // どうしてInvalidOperationExceptionの例外を使用したの？
                 // 👉️JSONからクラスに変換する時の例外は、JSONExceptionにした
-                GeoResponse geoString = JsonSerializer.Deserialize<GeoResponse>(geoJson, option) ?? throw new JsonException("位置情報APIのレスポンスを読み取れませんでした。");
-
-                // Debug.WriteLine($"geoString:{geoString}");
+                GeoResponse geoResponse = JsonSerializer.Deserialize<GeoResponse>(geoJson, option) ?? throw new JsonException("位置情報APIのレスポンスを読み取れませんでした。");
+                
+                // Debug.WriteLine($"geoString:{geoResponse}");
 
                 // 緯度経度を取得する
                 // GeoResult? hit = geo?.Results?.FirstOrDefault();らしいよ
@@ -59,10 +53,65 @@ public class WeatherApiClient{
                 // →Resultsプロパティが存在するってこと→nullになる可能性ないのでは？
                 // 👉️GeoResponseが合っても、Resultsに値が入っているとは限らない。nullの可能性がある
                 // 外からくるデータはnull許容型で受け止めてあげるほうが安全！
-                List<GeoResult>? geoResults = geoString.Results;
-
+                List<GeoResult>? geoResults = geoResponse.Results;
+                return geoResults;
                 //// 出力：geoResults: 
                 //Debug.WriteLine($"geoResults: {geoResults}");
+             }
+             
+            // 非同期処理＋recordでちょっと壁高めかも
+            // cityNameはstring?のほうがいいのかな？
+            public async Task<GeoInfo> GeoCodeAsync(string cityName)
+            
+            {
+                if (string.IsNullOrWhiteSpace(cityName))
+                {
+                    throw new ArgumentException("都市名を入力してください");
+                }
+                // // GeoResponseを受ける
+                // // URLで都市名で検索する
+                // // URLの作り方がわからない。非同期処理がGood
+                // // 変数名が変数名っぽく光っているかどうかを確認しよう！
+                // // TODO: どうしてURLを一括で書かないの？
+                // //　Uri.EscapeDataString(cityName)はどうして使うの？Uriクラスってなに？
+                // // クエリパラメーターの前はスラッシュいらないらしい
+                // // パラメーターの中にどうしてUri.EscapeDataStringがあるの？
+                // // ▷文字列の中に予約語があった場合も安全に送るため
+                // string geoUrl = $"https://geocoding-api.open-meteo.com/v1/search" + $"?name={Uri.EscapeDataString(cityName)}&count=1&language=ja&format=json";
+                // // EscapeDataStringでURLを安全な文字列に修正してくれうらしんだけど、間違っているかも、、、、
+                // // TODO: EscapeDataString()はここにいるのか？いらないのかい？
+                // // TODO: ここでnullが返ってくる可能性はないの？GeoResponse? geoString はnullの可能性がないと言うコードにした
+                // string geoJson = await http.GetStringAsync(geoUrl);
+
+                // // optionでJSONとプロパティ名をクラスに合わせて修正してくれる
+                // var option = new JsonSerializerOptions
+                // {
+                //     PropertyNameCaseInsensitive = true
+                // };
+                // // デシリアライズするとrecordの型にはめる事が可能（？）
+                // // TODO: GeoResponseはnullが入る可能性ある？👉️例外に変えたからnullにならない
+                // // どうしてInvalidOperationExceptionの例外を使用したの？
+                // // 👉️JSONからクラスに変換する時の例外は、JSONExceptionにした
+                // GeoResponse geoResponse = JsonSerializer.Deserialize<GeoResponse>(geoJson, option) ?? throw new JsonException("位置情報APIのレスポンスを読み取れませんでした。");
+                
+                // // Debug.WriteLine($"geoString:{geoResponse}");
+
+                // // 緯度経度を取得する
+                // // GeoResult? hit = geo?.Results?.FirstOrDefault();らしいよ
+                // // GeoResponseに入れたデータはレコードの型になっている。
+                // // そのResultsにアクセスすると、List<GeoResult>が取れる。
+
+                // // TODO: Resultsプロパティってnullになる可能性はある？
+                // // GeoResponsの型としてgeoString変数がある
+                // // →Resultsプロパティが存在するってこと→nullになる可能性ないのでは？
+                // // 👉️GeoResponseが合っても、Resultsに値が入っているとは限らない。nullの可能性がある
+                // // 外からくるデータはnull許容型で受け止めてあげるほうが安全！
+                // List<GeoResult>? geoResults = geoResponse.Results;
+
+                // //// 出力：geoResults: 
+                // //Debug.WriteLine($"geoResults: {geoResults}");
+
+                List<GeoResult>? geoResults = await  GetGeoResultsListAsync(cityName);
 
                 // FirstOrDefault()を使わないでやってみたいときはこれでいいですか？
                 // Listの中身が0の可能性があるから、件数も条件に入れる
