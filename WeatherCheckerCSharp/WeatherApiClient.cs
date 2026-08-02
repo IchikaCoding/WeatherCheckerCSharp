@@ -13,6 +13,9 @@ public class WeatherApiClient
     // HTTPクライアントを使用するとGetStringAsyncが使えて，渡されたデータ（ＪＳＯＮ）を文字列として受け取ることができる
     // Webにアクセスするためのインスタンス
     private static readonly HttpClient http = new HttpClient();
+    // TODO: これってconst で宣言して変数をクラス全体で使えるようにしている？プロパティにしないの？
+    // 👉️定数フィールドはこの書き方でOK
+    private const int MaxForecastDays = 3;
 
     // この処理は内部でしか使わない。だからprivateにしておこう
     private async Task<List<GeoResult>?> GetGeoResultsListAsync(string cityName)
@@ -51,7 +54,7 @@ public class WeatherApiClient
         // そのResultsにアクセスすると、List<GeoResult>が取れる。
 
         // TODO: Resultsプロパティってnullになる可能性はある？
-        // GeoResponsの型としてgeoString変数がある
+        // GeoResponseの型としてgeoString変数がある
         // →Resultsプロパティが存在するってこと→nullになる可能性ないのでは？
         // 👉️GeoResponseが合っても、Resultsに値が入っているとは限らない。nullの可能性がある
         // 外からくるデータはnull許容型で受け止めてあげるほうが安全！
@@ -107,18 +110,18 @@ public class WeatherApiClient
         return geoInfo;
     }
 
-    private async Task<ForecastResponse> FetchForecastResponseAsync(GeoInfo geoInfoPram)
+    private async Task<ForecastResponse> FetchForecastResponseAsync(GeoInfo geoInfo)
     {
         // 文化によって小数点の表し方が異なるらしい。
         // それによってパラメーターを変えないために文字列にして`CultureInfo.InvariantCulture`を使用してみた
-        string latitudeText = geoInfoPram.Latitude.ToString(CultureInfo.InvariantCulture);
-        string longitudeText = geoInfoPram.Longitude.ToString(CultureInfo.InvariantCulture);
+        string latitudeText = geoInfo.Latitude.ToString(CultureInfo.InvariantCulture);
+        string longitudeText = geoInfo.Longitude.ToString(CultureInfo.InvariantCulture);
         Console.WriteLine("latitudeText: " + latitudeText);
         // 3日分取得
         // URLのパラメーター部分は最初?でその後は＆で続ける
         // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
         // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
-        string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={latitudeText}&longitude={longitudeText}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
+        string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={latitudeText}&longitude={longitudeText}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + $"&timezone=Asia%2FTokyo&forecast_days={MaxForecastDays}";
         string? forecastJson = await http.GetStringAsync(forecastUrl);
 
         // ForecastResponse型のデータにする
@@ -151,8 +154,8 @@ public class WeatherApiClient
             throw new JsonException("天気予報APIのレスポンスに最高気温、もしくは最低気温のデータがありませんでした。");
         }
 
-        // 最大の日付を変数にしておくとこれだけ修正したら変更しやすい
-        const int MaxForecastDays = 3;
+        // // 最大の日付を変数にしておくとこれだけ修正したら変更しやすい
+        // const int MaxForecastDays = 3;
         int count = timeList.Count;
 
         if (count == 0)
@@ -183,9 +186,9 @@ public class WeatherApiClient
         return days;
     }
 
-    public async Task<List<DayForecast>> DayForecastAsync(GeoInfo geoInfoPram)
+    public async Task<List<DayForecast>> DayForecastAsync(GeoInfo geoInfo)
     {
-        ForecastResponse forecastResponse = await FetchForecastResponseAsync(geoInfoPram);
+        ForecastResponse forecastResponse = await FetchForecastResponseAsync(geoInfo);
         List<DayForecast> dayForecastList = CreateDayForecastList(forecastResponse);
         return dayForecastList;
         // // ForecastResponse forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson) ?? throw new JsonException("天気予報APIのレスポンスを読み取れませんでした。");
