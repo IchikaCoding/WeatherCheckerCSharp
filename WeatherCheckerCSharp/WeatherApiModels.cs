@@ -24,16 +24,16 @@ public record GeoResult(
 // 結果一覧（リスト）
 // nullを許容しておく。JSONデータが空の可能性があるから
 public record GeoResponse(
-    [property: JsonPropertyName("results")]  List<GeoResult>? Results
+    [property: JsonPropertyName("results")] List<GeoResult>? Results
     );
 
 // 天気予報はここから　
 public record DailyData(
     // もしかして、日付じゃなくて文字列？
-    [property: JsonPropertyName("time")] List<string> Time,
-    [property: JsonPropertyName("weather_code")] List<int> WeatherCode,
-    [property: JsonPropertyName("temperature_2m_max")] List<double> TempMax,
-    [property: JsonPropertyName("temperature_2m_min")] List<double> TempMin,
+    [property: JsonPropertyName("time")] List<string>? Time,
+    [property: JsonPropertyName("weather_code")] List<int>? WeatherCode,
+    [property: JsonPropertyName("temperature_2m_max")] List<double>? TempMax,
+    [property: JsonPropertyName("temperature_2m_min")] List<double>? TempMin,
     // 変数名長すぎた
     [property: JsonPropertyName("precipitation_probability_max")] List<int> PrecipProb
     );
