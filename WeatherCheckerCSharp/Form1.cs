@@ -1,12 +1,13 @@
 using System.Diagnostics;
-using System.Globalization;
-using System.Reflection.Emit;
-using System.Security.Policy;
 using System.Text.Json;
-//using System.IO;
-using System.Threading.Channels;
-using WeatherCheckerCSharp;
-using static System.Net.WebRequestMethods;
+
+// using System.Globalization;
+// using System.Reflection.Emit;
+// using System.Security.Policy;
+// //using System.IO;
+// using System.Threading.Channels;
+// using WeatherCheckerCSharp;
+// using static System.Net.WebRequestMethods;
 
 namespace WeatherCheckerCSharp
 {
@@ -34,7 +35,7 @@ namespace WeatherCheckerCSharp
             // これはアプリ起動する場合のコード↓
             // linkLabel3.LinkClicked += (s, e) =>  Process.Start("notepad");
 
-            linkLabel2.LinkClicked += (s, e) =>  Process.Start(new ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories") { UseShellExecute = true });
+            linkLabel2.LinkClicked += (s, e) => Process.Start(new ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories") { UseShellExecute = true });
             Debug.WriteLine(new ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories"));
         }
 
@@ -82,86 +83,6 @@ namespace WeatherCheckerCSharp
             // JSON文字列がない、、、
             // この処理結果を代入しておく必要がある
             string cityName = txtCity.Text.Trim();
-            // // 非同期処理＋recordでちょっと壁高めかも
-            // // cityNameはstring?のほうがいいのかな？
-            // async Task<GeoInfo> GeoCodeAsync(string cityName)
-            // {
-            //     if (string.IsNullOrWhiteSpace(cityName))
-            //     {
-            //         throw new ArgumentException("都市名を入力してください");
-            //     }
-            //     // GeoResponseを受ける
-            //     // URLで都市名で検索する
-            //     // URLの作り方がわからない。非同期処理がGood
-            //     // 変数名が変数名っぽく光っているかどうかを確認しよう！
-            //     // TODO: どうしてURLを一括で書かないの？
-            //     //　Uri.EscapeDataString(cityName)はどうして使うの？Uriクラスってなに？
-            //     // クエリパラメーターの前はスラッシュいらないらしい
-            //     // パラメーターの中にどうしてUri.EscapeDataStringがあるの？
-            //     // ▷文字列の中に予約語があった場合も安全に送るため
-            //     string geoUrl = $"https://geocoding-api.open-meteo.com/v1/search" + $"?name={Uri.EscapeDataString(cityName)}&count=1&language=ja&format=json";
-            //     // EscapeDataStringでURLを安全な文字列に修正してくれうらしんだけど、間違っているかも、、、、
-            //     // TODO: EscapeDataString()はここにいるのか？いらないのかい？
-            //     // TODO: ここでnullが返ってくる可能性はないの？GeoResponse? geoString はnullの可能性がないと言うコードにした
-            //     string geoJson = await http.GetStringAsync(geoUrl);
-
-            //     // optionでJSONとプロパティ名をクラスに合わせて修正してくれる
-            //     var option = new JsonSerializerOptions
-            //     {
-            //         PropertyNameCaseInsensitive = true
-            //     };
-            //     // デシリアライズするとrecordの型にはめる事が可能（？）
-            //     // TODO: GeoResponseはnullが入る可能性ある？👉️例外に変えたからnullにならない
-            //     // どうしてInvalidOperationExceptionの例外を使用したの？
-            //     // 👉️JSONからクラスに変換する時の例外は、JSONExceptionにした
-            //     GeoResponse geoString = JsonSerializer.Deserialize<GeoResponse>(geoJson, option) ?? throw new JsonException("位置情報APIのレスポンスを読み取れませんでした。");
-
-            //     // Debug.WriteLine($"geoString:{geoString}");
-
-            //     // 緯度経度を取得する
-            //     // GeoResult? hit = geo?.Results?.FirstOrDefault();らしいよ
-            //     // GeoResponseに入れたデータはレコードの型になっている。
-            //     // そのResultsにアクセスすると、List<GeoResult>が取れる。
-
-            //     // TODO: Resultsプロパティってnullになる可能性はある？
-            //     // GeoResponsの型としてgeoString変数がある
-            //     // →Resultsプロパティが存在するってこと→nullになる可能性ないのでは？
-            //     // 👉️GeoResponseが合っても、Resultsに値が入っているとは限らない。nullの可能性がある
-            //     // 外からくるデータはnull許容型で受け止めてあげるほうが安全！
-            //     List<GeoResult>? geoResults = geoString.Results;
-
-            //     //// 出力：geoResults: 
-            //     //Debug.WriteLine($"geoResults: {geoResults}");
-
-            //     // FirstOrDefault()を使わないでやってみたいときはこれでいいですか？
-            //     // Listの中身が0の可能性があるから、件数も条件に入れる
-            //     if (geoResults is null || geoResults.Count == 0)
-            //     {
-            //         // ここは例外に直す👉️CityNotFoundException
-            //         throw new CityNotFoundException($"「{cityName}」の検索結果がnullでした");
-            //     }
-            //     // Listの最初の要素は0だよ
-            //     GeoResult geoFirstItem = geoResults[0];
-
-            //     // 都市名が見つからなかった場合はここで早期リターン
-            //     // TODO: 取得出来なかった判定はどうやってやるの？
-            //     // GeoResultのNameプロパティがnullだったら、という条件じゃだめ？
-            //     // TODO: この処理によってgeoResultsが0件以上っていうことになっている
-            //     // if (geoFirstItem is null)
-            //     // {
-
-            //     //     lblStatus.Text = $"「{cityName}」が見つかりません";
-            //     //     throw new CityNotFoundException(cityName);
-            //     // }
-            //     // クラスで型を作成して戻り値にしてみる？
-            //     // 戻り値が複数ある時って、タプルとクラスの2種類ある？
-            //     double latitude = geoFirstItem.Latitude;
-            //     // ロンジェチュードって読むらしい
-            //     double longitude = geoFirstItem.Longitude;
-            //     // recordだから、括弧の中に直接値を渡したらプロパティに入れれるかも？！
-            //     return new GeoInfo(latitude, longitude);
-            // }
-
             // ＝＝＝＝＝実行させる場所＝＝＝＝＝
             if (string.IsNullOrEmpty(cityName))
             {
@@ -208,96 +129,8 @@ namespace WeatherCheckerCSharp
                 btnSearch.Enabled = true;
             }
 
-
-            // async Task<List<DayForecast>> DayForecastAsync(GeoInfo geoInfoPram)
-            // {
-            //     // 文化によって小数点の表し方が異なるらしい。
-            //     // それによってパラメーターを変えないために文字列にして`CultureInfo.InvariantCulture`を使用してみた
-            //     string latitudeText = geoInfoPram.Latitude.ToString(CultureInfo.InvariantCulture);
-            //     string longitudeText = geoInfoPram.Longitude.ToString(CultureInfo.InvariantCulture);
-            //     Console.WriteLine("latitudeText: " + latitudeText);
-            //     // 3日分取得
-            //     // URLのパラメーター部分は最初?でその後は＆で続ける
-            //     // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
-            //     // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
-            //     string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={latitudeText}&longitude={longitudeText}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + "&timezone=Asia%2FTokyo&forecast_days=3";
-            //     string? forecastJson = await http.GetStringAsync(forecastUrl);
-
-            //     // ForecastResponse型のデータにする
-            //     // InvalidOperationExceptionクラスの例外を投げる
-            //     // 引数以外の失敗で発生したときの例外らしい
-            //     ForecastResponse forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson) ?? throw new JsonException("天気予報APIのレスポンスを読み取れませんでした。");
-            //     // Dailyプロパティがあっても値がnullの可能性がある
-            //     DailyData? dailyData = forecastResponse.Daily;
-            //     if (dailyData is null)
-            //     {
-            //         // TODO: この例外クラスでいいのだろうか？
-            //         throw new JsonException("天気予報APIのレスポンスに daily がありませんでした。");
-            //     }
-            //     // ==================以下の部分はまだ例外の処理の実装メモがないよ====================
-            //     //Debug.WriteLine($"dailyData: {dailyData}");
-            //     List<string>? timeList = dailyData.Time;
-            //     List<int>? weatherCodeList = dailyData.WeatherCode;
-            //     List<double>? tempMaxList = dailyData.TempMax;
-            //     List<double>? tempMinList = dailyData.TempMin;
-            //     List<int>? precipProbList = dailyData.PrecipProb;
-
-            //     if (timeList is null || weatherCodeList is null || tempMaxList is null || tempMinList is null || precipProbList is null)
-            //     {
-            //         throw new JsonException("天気予報APIのレスポンスに最高気温、もしくは最低気温のデータがありませんでした。");
-            //     }
-
-            //     // 最大の日付を変数にしておくとこれだけ修正したら変更しやすい
-            //     const int MaxForecastDays = 3;
-            //     int count = timeList.Count;
-
-            //     if (count == 0)
-            //     {
-            //         throw new JsonException("天気予報APIのレスポンスの1日ごとのデータが取得出来ませんでした");
-            //     }
-            //     if (weatherCodeList.Count != count || tempMaxList.Count != count || tempMinList.Count != count || precipProbList.Count != count)
-            //     {
-            //         throw new JsonException("天気予報APIのレスポンスのデータがうまく取得出来ませんでした");
-            //     }
-                
-            //     if(count < MaxForecastDays)
-            //     {
-            //         throw new JsonException($"天気予報は{MaxForecastDays}日分を想定していますが、{count}日分で{MaxForecastDays}日分に足りませんでした");
-            //     }
-                
-
-
-            //     // ======================================================
-            //     // 3日分のデータを1日分ごとにまとめてリストにする
-            //     var days = new List<DayForecast>();
-            //     // TODO: もしかしたらfor文全体をtry-catchで囲んでNullReferenceExceptionをしたほうがいいかも？
-            //     for (int i = 0; i < MaxForecastDays; i++)
-            //     {
-            //         days.Add(new DayForecast(timeList[i], weatherCodeList[i], tempMaxList[i], tempMinList[i], precipProbList[i]));
-            //     }
-            //     Debug.WriteLine($"days:{days}");
-            //     return days;
-            // }
-
-
             void ShowDayForecast(List<DayForecast> dayForecasts)
             {
-                // AppendLineが使えるようになるっぽい
-                // var sb = new System.Text.StringBuilder();
-
-                // try
-                // {
-                //     // Listの長さが3件以外だったら例外
-                // if(dayForecasts.Count() != 3)
-                // {
-                //     throw new IndexOutOfRangeException();
-                // }
-                // }
-                // catch(IndexOutOfRangeException error)
-                // {
-                //     MessageBox.Show(error.Message);
-                // }
-                
                 // ここでfor分を書く
                 // ラベルに一つずつ入れる処理を書く
                 // dayForecastsのインデックスに合わせて、ラベルに入れる
@@ -314,12 +147,6 @@ namespace WeatherCheckerCSharp
                     forecastLabels[i].Text = stringDayForecast;
                 }
 
-                // foreach (var day in dayForecasts)
-                // {
-                //     (string emoji, string label) = Describe(day.Code);
-                //     sb.AppendLine($"{day.Time} {emoji} {label}");
-                //     sb.AppendLine($"最高気温：{day.Max} 最低気温：{day.Min} 降水確率：{day.Prob}");
-                // }
                 // sbはToString()で文字列として表示できるらしい
                 // lblStatus.Text = sb.ToString();
                 //this.BackColor = days[0].Code == 0 ? Color.FromArgb(255, 247, 224): Color.FromArgb(232, 238, 245);
@@ -328,11 +155,6 @@ namespace WeatherCheckerCSharp
                 this.BackColor = Color.FromArgb(255, 247, 224);
             }
         }
-
-        //private string? EscapeDataString(string url)
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         // これどこで使うメソッド？JSONだからクラスに直すのでは？
         private void txtRaw_TextChanged(object sender, EventArgs e)
