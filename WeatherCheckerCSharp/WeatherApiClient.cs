@@ -15,6 +15,7 @@ public class WeatherApiClient
     private static readonly HttpClient http = new HttpClient();
     // TODO: これってconst で宣言して変数をクラス全体で使えるようにしている？プロパティにしないの？
     // 👉️定数フィールドはこの書き方でOK
+    // 最大の日付を変数にしておくとこれだけ修正したら変更しやすい
     private const int MaxForecastDays = 3;
 
     // この処理は内部でしか使わない。だからprivateにしておこう
@@ -45,9 +46,6 @@ public class WeatherApiClient
         // どうしてInvalidOperationExceptionの例外を使用したの？
         // 👉️JSONからクラスに変換する時の例外は、JSONExceptionにした
         GeoResponse geoResponse = JsonSerializer.Deserialize<GeoResponse>(geoJson, option) ?? throw new JsonException("位置情報APIのレスポンスを読み取れませんでした。");
-
-        // Debug.WriteLine($"geoString:{geoResponse}");
-
         // 緯度経度を取得する
         // GeoResult? hit = geo?.Results?.FirstOrDefault();らしいよ
         // GeoResponseに入れたデータはレコードの型になっている。
@@ -60,8 +58,6 @@ public class WeatherApiClient
         // 外からくるデータはnull許容型で受け止めてあげるほうが安全！
         List<GeoResult>? geoResults = geoResponse.Results;
         return geoResults;
-        //// 出力：geoResults: 
-        //Debug.WriteLine($"geoResults: {geoResults}");
     }
 
     private GeoInfo CreateGeoInfoFromGeoResults(List<GeoResult>? geoResults, string cityName)
@@ -76,16 +72,6 @@ public class WeatherApiClient
         // Listの最初の要素は0だよ
         GeoResult geoFirstItem = geoResults[0];
 
-        // 都市名が見つからなかった場合はここで早期リターン
-        // TODO: 取得出来なかった判定はどうやってやるの？
-        // GeoResultのNameプロパティがnullだったら、という条件じゃだめ？
-        // TODO: この処理によってgeoResultsが0件以上っていうことになっている
-        // if (geoFirstItem is null)
-        // {
-
-        //     lblStatus.Text = $"「{cityName}」が見つかりません";
-        //     throw new CityNotFoundException(cityName);
-        // }
         // クラスで型を作成して戻り値にしてみる？
         // 戻り値が複数ある時って、タプルとクラスの2種類ある？
         double latitude = geoFirstItem.Latitude;
@@ -122,7 +108,8 @@ public class WeatherApiClient
         // TODO: ＆とカンマの違いと、カンマの位置と足し算にする場所が不明
         // 👉️カンマは一つの項目の値を並べるやつ。＆は項目自体をくっつけるやつ？これどこで定義されているの？
         string forecastUrl = $"https://api.open-meteo.com/v1/forecast" + $"?latitude={latitudeText}&longitude={longitudeText}" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" + $"&timezone=Asia%2FTokyo&forecast_days={MaxForecastDays}";
-        string? forecastJson = await http.GetStringAsync(forecastUrl);
+        // http.GetStringAsync()はTask<string>を返す。nullは許容していないから、ここでも非許容にした。
+        string forecastJson = await http.GetStringAsync(forecastUrl);
 
         // ForecastResponse型のデータにする
         // InvalidOperationExceptionクラスの例外を投げる
@@ -142,7 +129,6 @@ public class WeatherApiClient
             throw new JsonException("天気予報APIのレスポンスに daily がありませんでした。");
         }
         // ==================以下の部分はまだ例外の処理の実装メモがないよ====================
-        //Debug.WriteLine($"dailyData: {dailyData}");
         List<string>? timeList = dailyData.Time;
         List<int>? weatherCodeList = dailyData.WeatherCode;
         List<double>? tempMaxList = dailyData.TempMax;
@@ -154,8 +140,6 @@ public class WeatherApiClient
             throw new JsonException("天気予報APIのレスポンスに最高気温、もしくは最低気温のデータがありませんでした。");
         }
 
-        // // 最大の日付を変数にしておくとこれだけ修正したら変更しやすい
-        // const int MaxForecastDays = 3;
         int count = timeList.Count;
 
         if (count == 0)
@@ -182,7 +166,6 @@ public class WeatherApiClient
         {
             days.Add(new DayForecast(timeList[i], weatherCodeList[i], tempMaxList[i], tempMinList[i], precipProbList[i]));
         }
-        Debug.WriteLine($"days:{days}");
         return days;
     }
 
@@ -191,56 +174,5 @@ public class WeatherApiClient
         ForecastResponse forecastResponse = await FetchForecastResponseAsync(geoInfo);
         List<DayForecast> dayForecastList = CreateDayForecastList(forecastResponse);
         return dayForecastList;
-        // // ForecastResponse forecastResponse = JsonSerializer.Deserialize<ForecastResponse>(forecastJson) ?? throw new JsonException("天気予報APIのレスポンスを読み取れませんでした。");
-        // // Dailyプロパティがあっても値がnullの可能性がある
-        // DailyData? dailyData = forecastResponse.Daily;
-        // if (dailyData is null)
-        // {
-        //     // TODO: この例外クラスでいいのだろうか？
-        //     throw new JsonException("天気予報APIのレスポンスに daily がありませんでした。");
-        // }
-        // // ==================以下の部分はまだ例外の処理の実装メモがないよ====================
-        // //Debug.WriteLine($"dailyData: {dailyData}");
-        // List<string>? timeList = dailyData.Time;
-        // List<int>? weatherCodeList = dailyData.WeatherCode;
-        // List<double>? tempMaxList = dailyData.TempMax;
-        // List<double>? tempMinList = dailyData.TempMin;
-        // List<int>? precipProbList = dailyData.PrecipProb;
-
-        // if (timeList is null || weatherCodeList is null || tempMaxList is null || tempMinList is null || precipProbList is null)
-        // {
-        //     throw new JsonException("天気予報APIのレスポンスに最高気温、もしくは最低気温のデータがありませんでした。");
-        // }
-
-        // // 最大の日付を変数にしておくとこれだけ修正したら変更しやすい
-        // const int MaxForecastDays = 3;
-        // int count = timeList.Count;
-
-        // if (count == 0)
-        // {
-        //     throw new JsonException("天気予報APIのレスポンスの1日ごとのデータが取得出来ませんでした");
-        // }
-        // if (weatherCodeList.Count != count || tempMaxList.Count != count || tempMinList.Count != count || precipProbList.Count != count)
-        // {
-        //     throw new JsonException("天気予報APIのレスポンスのデータがうまく取得出来ませんでした");
-        // }
-
-        // if (count < MaxForecastDays)
-        // {
-        //     throw new JsonException($"天気予報は{MaxForecastDays}日分を想定していますが、{count}日分で{MaxForecastDays}日分に足りませんでした");
-        // }
-
-
-
-        // // ======================================================
-        // // 3日分のデータを1日分ごとにまとめてリストにする
-        // var days = new List<DayForecast>();
-        // // TODO: もしかしたらfor文全体をtry-catchで囲んでNullReferenceExceptionをしたほうがいいかも？
-        // for (int i = 0; i < MaxForecastDays; i++)
-        // {
-        //     days.Add(new DayForecast(timeList[i], weatherCodeList[i], tempMaxList[i], tempMinList[i], precipProbList[i]));
-        // }
-        // Debug.WriteLine($"days:{days}");
-        // return days;
     }
 }
