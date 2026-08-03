@@ -7,6 +7,9 @@ using System.Diagnostics;
 
 namespace WeatherCheckerCSharp;
 
+/// <summary>
+/// 天気予報データを取得するクラスです。
+/// </summary>
 public class WeatherApiClient
 {
 
@@ -19,6 +22,12 @@ public class WeatherApiClient
     private const int MaxForecastDays = 3;
 
     // この処理は内部でしか使わない。だからprivateにしておこう
+    /// <summary>
+    /// 緯度経度の情報を取得する非同期処理です。
+    /// </summary>
+    /// <param name="cityName">天気を調べる都市名です</param>
+    /// <returns>GeoResultのListを返す</returns>
+    /// <exception cref="JsonException"></exception>
     private async Task<List<GeoResult>?> GetGeoResultsListAsync(string cityName)
     {
         // GeoResponseを受ける
