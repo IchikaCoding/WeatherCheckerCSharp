@@ -13,9 +13,15 @@ namespace WeatherCheckerCSharp
 {
     public partial class Form1 : Form
     {
+        // これフィールド。
+        private string _favPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
+        // Repositoryを保持しておくためのフィールドを作成。
+        private readonly FavoriteRepository _favoriteRepository;
+        private WeatherApiClient weatherApiClient = new WeatherApiClient();
         public Form1()
         {
             InitializeComponent();
+            _favoriteRepository = new FavoriteRepository(_favPath);
             // 参照先を表示
             // リンクラベルの表示を書き換える
             // TODO: イベントについて学んだあとにもう一度このコードを見直す
@@ -24,10 +30,10 @@ namespace WeatherCheckerCSharp
             // System.Diagnostics.Process.Start("起動したいアプリ")
             // 引数はsenderとeventカナ？
             linkLabel1.LinkClicked += (s, e) => Process.Start(
-               // ここで外部アプリを開く処理を設定している
-               // シェルを使用する必要がある場合はtrueにするらしい
-               // UseShellExecuteがtrueだと、シェルを使って処理を実行したいっていう設定？
-               new ProcessStartInfo("https://open-meteo.com/") { UseShellExecute = true });
+            // ここで外部アプリを開く処理を設定している
+            // シェルを使用する必要がある場合はtrueにするらしい
+            // UseShellExecuteがtrueだと、シェルを使って処理を実行したいっていう設定？
+            new ProcessStartInfo("https://open-meteo.com/") { UseShellExecute = true });
             linkLabel2.Text = "🌻いちかどんのGitHubのページ🌻";
             //linkLabel2.LinkClicked += (s, e) => System.Diagnostics.Process.Start(
             //    new System.Diagnostics.ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories") { UseShellExecute = true }
@@ -38,17 +44,14 @@ namespace WeatherCheckerCSharp
             linkLabel2.LinkClicked += (s, e) => Process.Start(new ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories") { UseShellExecute = true });
             Debug.WriteLine(new ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories"));
         }
-        // これフィールド。
-        private string FavPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
-        private readonly WeatherApiClient weatherApiClient = new WeatherApiClient();
-        private readonly FavoriteRepository favoriteRepository = new FavoriteRepository(FavPath);
+
         // 非同期処理だけどTask型はLoadに登録できない。だからVoidにした
         // ファイルが壊れているかもしれない。読み込む権限がないかもしれない。読み込み失敗しているかもしれない
         private async void Form1_Load(object sender, EventArgs e)
         {
             try
             {
-                List<string> favs = await favoriteRepository.LoadFavoritesAsync();
+                List<string> favs = await _favoriteRepository.LoadFavoritesAsync();
                 // 配列に直したお気に入りの都市たちを
                 // AddRange()はListの末尾に要素を追加できるやつ。
                 // コンボボックスの中に配列にして一気にお気に入りを追加
@@ -271,7 +274,7 @@ namespace WeatherCheckerCSharp
             {
                 // 非同期処理の例外をキャッチしてみよう
                 // ここでJSONの内容を取得して、その中身から都市名の存在確認をしている。画面の都市名だけで判断していないのでGood！
-                List<string> favariteList = await favoriteRepository.LoadFavoritesAsync();
+                List<string> favariteList = await _favoriteRepository.LoadFavoritesAsync();
                 // どうして毎回受け取る変数を作り忘れるのだろうか？
                 // 大文字・小文字区別しないで比較したいときは`StringComparison.OrdinalIgnoreCase`でルールを追加する
                 bool alreadyExists = favariteList.Any(favarite => string.Equals(favarite, trimmedCityName, StringComparison.OrdinalIgnoreCase));
@@ -283,7 +286,7 @@ namespace WeatherCheckerCSharp
                 // Listに追加したい
                 favariteList.Add(trimmedCityName);
                 // 最新のお気に入りListを登録する
-                await favoriteRepository.SaveFavoritesAsync(favariteList);
+                await _favoriteRepository.SaveFavoritesAsync(favariteList);
                 // どうしてClear()？👉️クリアしてまた新しいバージョンを登録する。JSONがいつでもデータの参照先
                 cmbFavorites.Items.Clear();
                 cmbFavorites.Items.AddRange(favariteList.ToArray());
@@ -347,7 +350,7 @@ namespace WeatherCheckerCSharp
             try
             {
                 // favariteListはJSONデータ
-                List<string> favariteList = await favoriteRepository.LoadFavoritesAsync();
+                List<string> favariteList = await _favoriteRepository.LoadFavoritesAsync();
                 bool wasRemoved = favariteList.Remove((string)selectedCity);
                 // もしJSONにお気に入りがなかったら存在しませんっていって早期リターンする
                 if (!wasRemoved)
@@ -361,7 +364,7 @@ namespace WeatherCheckerCSharp
                     return;
                 }
 
-                await favoriteRepository.SaveFavoritesAsync(favariteList);
+                await _favoriteRepository.SaveFavoritesAsync(favariteList);
                 cmbFavorites.Items.Clear();
                 cmbFavorites.Items.AddRange(favariteList.ToArray());
                 MessageBox.Show($"お気に入りから{selectedCity}を削除しました");
