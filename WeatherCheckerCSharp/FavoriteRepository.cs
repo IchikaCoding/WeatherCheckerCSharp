@@ -14,8 +14,8 @@ namespace WeatherCheckerCSharp
         // 👉️staticの理由：Form1のインスタンスが複数作られても、同じFavPathを使用するよという意味。
         // 更新出来ないようにreadonlyを使っている。
         // TODO: ユーザーが保存先を選べる機能を作る
-
-        private string _filePath;
+        // ここのパスは外部から受け取って変更させない。
+        private readonly string _filePath;
         public FavoriteRepository(string filePath)
         {
             _filePath = filePath;
