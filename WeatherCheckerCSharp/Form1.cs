@@ -38,15 +38,17 @@ namespace WeatherCheckerCSharp
             linkLabel2.LinkClicked += (s, e) => Process.Start(new ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories") { UseShellExecute = true });
             Debug.WriteLine(new ProcessStartInfo("https://github.com/IchikaCoding?tab=repositories"));
         }
-
+        // これフィールド。
+        private string FavPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
         private readonly WeatherApiClient weatherApiClient = new WeatherApiClient();
+        private readonly FavoriteRepository favoriteRepository = new FavoriteRepository(FavPath);
         // 非同期処理だけどTask型はLoadに登録できない。だからVoidにした
         // ファイルが壊れているかもしれない。読み込む権限がないかもしれない。読み込み失敗しているかもしれない
         private async void Form1_Load(object sender, EventArgs e)
         {
             try
             {
-                List<string> favs = await LoadFavoritesAsync();
+                List<string> favs = await favoriteRepository.LoadFavoritesAsync();
                 // 配列に直したお気に入りの都市たちを
                 // AddRange()はListの末尾に要素を追加できるやつ。
                 // コンボボックスの中に配列にして一気にお気に入りを追加
@@ -185,65 +187,65 @@ namespace WeatherCheckerCSharp
 
         }
 
-        // お気に入り登録処理
-        // TODO: おそらく、各自の環境のApplicationDataフォルダがあるパスを取得
-        //  "MyWeather", "favorites.json"とかとくっつけてFavPathに代入する
-        // どうしてstaticなの？変数ってstaticにする意味はありますか？
-        // 👉️staticの理由：Form1のインスタンスが複数作られても、同じFavPathを使用するよという意味。
-        // 更新出来ないようにreadonlyを使っている。
-        // TODO: ユーザーが保存先を選べる機能を作る
-        private static readonly string FavPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
+        //// お気に入り登録処理
+        //// TODO: おそらく、各自の環境のApplicationDataフォルダがあるパスを取得
+        ////  "MyWeather", "favorites.json"とかとくっつけてFavPathに代入する
+        //// どうしてstaticなの？変数ってstaticにする意味はありますか？
+        //// 👉️staticの理由：Form1のインスタンスが複数作られても、同じFavPathを使用するよという意味。
+        //// 更新出来ないようにreadonlyを使っている。
+        //// TODO: ユーザーが保存先を選べる機能を作る
+        //private static readonly string FavPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
 
-        // TODO: List<string>はなに？👉️お気に入りの都市がstringで、それのList
-        private async Task SaveFavoritesAsync(List<string> favs)
-        {
-            // favorites.jsonというディレクトリを作成する（登録処理）
-            // TODO: FavPathがnull参照引数になっているらしい。でもFavPathは文字列では？
-            // 👉️Yes。Path.GetDirectoryName()の戻り値がstring?。nullの可能性もある
-            string? directoryPath = Path.GetDirectoryName(FavPath);
-            if (directoryPath is null)
-            {
-                throw new InvalidOperationException("お気に入りファイルの保存先が正しくありません");
-            }
-            Directory.CreateDirectory(directoryPath);
-            // シリアライズをしてクラスからJSONに戻す
-            // { WriteIndented = true}ってオブジェクト初期化子？👉️Yes!!!
-            // WriteIndentedをtrueにすると、JSONを作成する時に、見やすいJSONになるらしい。（例：プロパティ名と値の間に空白を追加する。）
-            JsonSerializerOptions option = new JsonSerializerOptions { WriteIndented = true };
-            // クラスからJSONデータへ変換する、
-            string json = JsonSerializer.Serialize(favs, option);
-            // パスを指定して非同期でファイルを読む
-            // Fileは2種類選べるようになっていて曖昧。これは指定してあげたら治るかも
-            // TODO: ここでJSON上書きをしている。FavoriteRepositoryを作る時に一時ファイルに保存したりして修正してみたい
-            await System.IO.File.WriteAllTextAsync(FavPath, json);
-        }
-        // LoadFavoritesAsync()を作成する（読み込み処理）
+        //// TODO: List<string>はなに？👉️お気に入りの都市がstringで、それのList
+        //private async Task SaveFavoritesAsync(List<string> favs)
+        //{
+        //    // favorites.jsonというディレクトリを作成する（登録処理）
+        //    // TODO: FavPathがnull参照引数になっているらしい。でもFavPathは文字列では？
+        //    // 👉️Yes。Path.GetDirectoryName()の戻り値がstring?。nullの可能性もある
+        //    string? directoryPath = Path.GetDirectoryName(FavPath);
+        //    if (directoryPath is null)
+        //    {
+        //        throw new InvalidOperationException("お気に入りファイルの保存先が正しくありません");
+        //    }
+        //    Directory.CreateDirectory(directoryPath);
+        //    // シリアライズをしてクラスからJSONに戻す
+        //    // { WriteIndented = true}ってオブジェクト初期化子？👉️Yes!!!
+        //    // WriteIndentedをtrueにすると、JSONを作成する時に、見やすいJSONになるらしい。（例：プロパティ名と値の間に空白を追加する。）
+        //    JsonSerializerOptions option = new JsonSerializerOptions { WriteIndented = true };
+        //    // クラスからJSONデータへ変換する、
+        //    string json = JsonSerializer.Serialize(favs, option);
+        //    // パスを指定して非同期でファイルを読む
+        //    // Fileは2種類選べるようになっていて曖昧。これは指定してあげたら治るかも
+        //    // TODO: ここでJSON上書きをしている。FavoriteRepositoryを作る時に一時ファイルに保存したりして修正してみたい
+        //    await System.IO.File.WriteAllTextAsync(FavPath, json);
+        //}
+        //// LoadFavoritesAsync()を作成する（読み込み処理）
 
-        private async Task<List<string>> LoadFavoritesAsync()
-        {
-            // ファイルがないなら、空のリストを返す
-            // ファイルの中身全て読んでJSON文字列にする
-            // JSONからListにして、もしnullなら新しいListを作成？
-            if (!System.IO.File.Exists(FavPath))
-            {
-                return new List<string>();
-            }
-            string json = await System.IO.File.ReadAllTextAsync(FavPath);
-            // new()ってなんだろう？new List<string>()で空のリスト作れない？
-            // JsonSerializer.Deserializeは戻り値がTValue?👉非同期じゃない。null許容型だからnull合体演算子をつけておくのがいいっぽい
-            List<string> favList = JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
-            // TODO: `.Distinct(StringComparer.OrdinalIgnoreCase)`がわからない
-            // JSON手動で変更された時のために、ここにも要素チェックを入れておく
-            // TODO: 共通のメソッドにしておくと便利かも。
-            return favList
-                .Where(favItem => !string.IsNullOrWhiteSpace(favItem))
-                .Select(favItem => favItem.Trim())
-                // Distinct()とは？
-                // もとの LIST を書き換えないで、重複を取り除いてくれるらしい
-                // 英字の大文字と小文字を区別しない比較ルール
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-        }
+        //private async Task<List<string>> LoadFavoritesAsync()
+        //{
+        //    // ファイルがないなら、空のリストを返す
+        //    // ファイルの中身全て読んでJSON文字列にする
+        //    // JSONからListにして、もしnullなら新しいListを作成？
+        //    if (!System.IO.File.Exists(FavPath))
+        //    {
+        //        return new List<string>();
+        //    }
+        //    string json = await System.IO.File.ReadAllTextAsync(FavPath);
+        //    // new()ってなんだろう？new List<string>()で空のリスト作れない？
+        //    // JsonSerializer.Deserializeは戻り値がTValue?👉非同期じゃない。null許容型だからnull合体演算子をつけておくのがいいっぽい
+        //    List<string> favList = JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
+        //    // TODO: `.Distinct(StringComparer.OrdinalIgnoreCase)`がわからない
+        //    // JSON手動で変更された時のために、ここにも要素チェックを入れておく
+        //    // TODO: 共通のメソッドにしておくと便利かも。
+        //    return favList
+        //        .Where(favItem => !string.IsNullOrWhiteSpace(favItem))
+        //        .Select(favItem => favItem.Trim())
+        //        // Distinct()とは？
+        //        // もとの LIST を書き換えないで、重複を取り除いてくれるらしい
+        //        // 英字の大文字と小文字を区別しない比較ルール
+        //        .Distinct(StringComparer.OrdinalIgnoreCase)
+        //        .ToList();
+        //}
 
         private async void btnFav_Click(object sender, EventArgs e)
         {
@@ -269,7 +271,7 @@ namespace WeatherCheckerCSharp
             {
                 // 非同期処理の例外をキャッチしてみよう
                 // ここでJSONの内容を取得して、その中身から都市名の存在確認をしている。画面の都市名だけで判断していないのでGood！
-                List<string> favariteList = await LoadFavoritesAsync();
+                List<string> favariteList = await favoriteRepository.LoadFavoritesAsync();
                 // どうして毎回受け取る変数を作り忘れるのだろうか？
                 // 大文字・小文字区別しないで比較したいときは`StringComparison.OrdinalIgnoreCase`でルールを追加する
                 bool alreadyExists = favariteList.Any(favarite => string.Equals(favarite, trimmedCityName, StringComparison.OrdinalIgnoreCase));
@@ -281,7 +283,7 @@ namespace WeatherCheckerCSharp
                 // Listに追加したい
                 favariteList.Add(trimmedCityName);
                 // 最新のお気に入りListを登録する
-                await SaveFavoritesAsync(favariteList);
+                await favoriteRepository.SaveFavoritesAsync(favariteList);
                 // どうしてClear()？👉️クリアしてまた新しいバージョンを登録する。JSONがいつでもデータの参照先
                 cmbFavorites.Items.Clear();
                 cmbFavorites.Items.AddRange(favariteList.ToArray());
@@ -345,7 +347,7 @@ namespace WeatherCheckerCSharp
             try
             {
                 // favariteListはJSONデータ
-                List<string> favariteList = await LoadFavoritesAsync();
+                List<string> favariteList = await favoriteRepository.LoadFavoritesAsync();
                 bool wasRemoved = favariteList.Remove((string)selectedCity);
                 // もしJSONにお気に入りがなかったら存在しませんっていって早期リターンする
                 if (!wasRemoved)
@@ -359,7 +361,7 @@ namespace WeatherCheckerCSharp
                     return;
                 }
 
-                await SaveFavoritesAsync(favariteList);
+                await favoriteRepository.SaveFavoritesAsync(favariteList);
                 cmbFavorites.Items.Clear();
                 cmbFavorites.Items.AddRange(favariteList.ToArray());
                 MessageBox.Show($"お気に入りから{selectedCity}を削除しました");

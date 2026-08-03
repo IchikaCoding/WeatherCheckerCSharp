@@ -76,7 +76,9 @@ public class WeatherApiClient
         if (geoResults is null || geoResults.Count == 0)
         {
             // ここは例外に直す👉️CityNotFoundException
-            throw new CityNotFoundException($"「{cityName}」の検索結果がありませんでした");
+            // 二重エラーメッセージを防ぐために、エラーメッセージはつくらない。
+            // CityNotFoundExceptionクラスでエラーメッセージは作る
+            throw new CityNotFoundException(cityName);
         }
         // Listの最初の要素は0だよ
         GeoResult geoFirstItem = geoResults[0];
@@ -92,6 +94,7 @@ public class WeatherApiClient
 
     // 非同期処理＋recordでちょっと壁高めかも
     // cityNameはstring?のほうがいいのかな？
+    // TODO: try-catchをし忘れている
     public async Task<GeoInfo> GeoCodeAsync(string cityName)
 
     {
@@ -178,6 +181,7 @@ public class WeatherApiClient
         return days;
     }
 
+    // TODO: try-catchを書いていない
     public async Task<List<DayForecast>> DayForecastAsync(GeoInfo geoInfo)
     {
         ForecastResponse forecastResponse = await FetchForecastResponseAsync(geoInfo);
