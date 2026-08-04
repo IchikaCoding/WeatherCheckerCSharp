@@ -20,30 +20,54 @@ namespace WeatherCheckerCSharp
         {
             _filePath = filePath;
         }
-        // TODO: List<string>はなに？👉️お気に入りの都市がstringで、それのList
-        public async Task SaveFavoritesAsync(List<string> favs)
+        // // TODO: List<string>はなに？👉️お気に入りの都市がstringで、それのList
+        // public async Task SaveFavoritesAsync(List<string> favs)
+        // {
+        //     // favorites.jsonというディレクトリを作成する（登録処理）
+        //     // TODO: FavPathがnull参照引数になっているらしい。でもFavPathは文字列では？
+        //     // 👉️Yes。Path.GetDirectoryName()の戻り値がstring?。nullの可能性もある
+        //     string? directoryPath = Path.GetDirectoryName(_filePath);
+        //     if (directoryPath is null)
+        //     {
+        //         throw new InvalidOperationException("お気に入りファイルの保存先が正しくありません");
+        //     }
+        //     Directory.CreateDirectory(directoryPath);
+        //     // シリアライズをしてクラスからJSONに戻す
+        //     // { WriteIndented = true}ってオブジェクト初期化子？👉️Yes!!!
+        //     // WriteIndentedをtrueにすると、JSONを作成する時に、見やすいJSONになるらしい。（例：プロパティ名と値の間に空白を追加する。）
+        //     JsonSerializerOptions option = new JsonSerializerOptions { WriteIndented = true };
+        //     // クラスからJSONデータへ変換する、
+        //     string json = JsonSerializer.Serialize(favs, option);
+        //     // パスを指定して非同期でファイルを読む
+        //     // Fileは2種類選べるようになっていて曖昧。これは指定してあげたら治るかも
+        //     // TODO: ここでJSON上書きをしている。FavoriteRepositoryを作る時に一時ファイルに保存したりして修正してみたい
+        //     await System.IO.File.WriteAllTextAsync(_filePath, json);
+        // }
+        // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+        // SaveJsonSafelyAsyncメソッドを作成する
+        // 引数はpath, ジェネリックのvalieをもらってくる。CancellationTokenにdefaultをいれる
+        // pathからディレクトリを作成する
+        // ディレクトリがなかったら作る
+        // tempPathを作る
+        // FileStreamを使ってみる。ファイル読み書きをするために。引数は考える。👉️FileStreamは調べたら引数もわかりそうだよ
+        // streamクラスからJSONに変換する。しかもFlushAsyncっていうものをやるらしい
+        // パスが存在していたら、元のファイルをbackupに入れる。新しいものとファイルごと入れ替える
+        // もしパスがあった場合は、パスにファイルを保存する。
+        // 失敗した場合は捨てる
+        public async Task SaveJsonSafelyAsync<T>(string path, T value, CancellationToken cancellationToken = default)
         {
-            // favorites.jsonというディレクトリを作成する（登録処理）
-            // TODO: FavPathがnull参照引数になっているらしい。でもFavPathは文字列では？
-            // 👉️Yes。Path.GetDirectoryName()の戻り値がstring?。nullの可能性もある
-            string? directoryPath = Path.GetDirectoryName(_filePath);
-            if (directoryPath is null)
+            var directory = Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
             {
-                throw new InvalidOperationException("お気に入りファイルの保存先が正しくありません");
+                // どうしてディレクトリを作成するの？
+                Directory.CreateDirectory(path);
             }
-            Directory.CreateDirectory(directoryPath);
-            // シリアライズをしてクラスからJSONに戻す
-            // { WriteIndented = true}ってオブジェクト初期化子？👉️Yes!!!
-            // WriteIndentedをtrueにすると、JSONを作成する時に、見やすいJSONになるらしい。（例：プロパティ名と値の間に空白を追加する。）
-            JsonSerializerOptions option = new JsonSerializerOptions { WriteIndented = true };
-            // クラスからJSONデータへ変換する、
-            string json = JsonSerializer.Serialize(favs, option);
-            // パスを指定して非同期でファイルを読む
-            // Fileは2種類選べるようになっていて曖昧。これは指定してあげたら治るかも
-            // TODO: ここでJSON上書きをしている。FavoriteRepositoryを作る時に一時ファイルに保存したりして修正してみたい
-            await System.IO.File.WriteAllTextAsync(_filePath, json);
+            // tempPathファイルを作成する
+            var tempPath = File.Create(path);
+            FileStream fileStream = new FileStream()
+
         }
-        // LoadFavoritesAsync()を作成する（読み込み処理）
+
 
         public async Task<List<string>> LoadFavoritesAsync()
         {
