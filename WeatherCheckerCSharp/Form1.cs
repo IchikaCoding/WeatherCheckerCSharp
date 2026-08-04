@@ -14,7 +14,9 @@ namespace WeatherCheckerCSharp
     public partial class Form1 : Form
     {
         // これフィールド。
-        private readonly string _favPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
+        // どうしてここでconst ができないの？定数じゃありません！って言われました
+        // 👉️プログラムを実行する前から決まっている値のみが `const` で宣言可能
+        private static readonly string _favPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
         // Repositoryを保持しておくためのフィールドを作成。
         private readonly FavoriteRepository _favoriteRepository;
         private WeatherApiClient weatherApiClient = new WeatherApiClient();
