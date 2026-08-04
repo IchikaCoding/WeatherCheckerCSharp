@@ -64,7 +64,7 @@ namespace WeatherCheckerCSharp
             }
             // tempPathファイルを作成する
             var tempPath = File.Create(path);
-            FileStream fileStream = new FileStream()
+            FileStream fileStream = new FileStream();
 
         }
 
