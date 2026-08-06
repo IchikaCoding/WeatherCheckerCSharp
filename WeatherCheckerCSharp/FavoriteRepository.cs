@@ -64,6 +64,7 @@ namespace WeatherCheckerCSharp
             // JSONの出力結果に見やすいインデントや改行（整形印刷）を付けるための設定プロパティ
             var json = JsonSerializer.Serialize(favorites, new JsonSerializerOptions { WriteIndented = true });
             // 一時ファイルの保存
+            // WriteAllTextAsyncはいったん中身消してから上書きする処理
             await File.WriteAllTextAsync(tempPath, json);
             // tempPathのファイルをpathに移動させる、上書きOK
             File.Move(tempPath, path, overwrite: true);

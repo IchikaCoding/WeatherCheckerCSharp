@@ -227,7 +227,7 @@ namespace WeatherCheckerCSharp
                 // Listに追加したい
                 favariteList.Add(trimmedCityName);
                 // 最新のお気に入りListを登録する
-                await _favoriteRepository.SaveFavoritesAsync(favariteList);
+                await _favoriteRepository.SaveJsonSafelyAsync(_favPath, favariteList);
                 // どうしてClear()？👉️クリアしてまた新しいバージョンを登録する。JSONがいつでもデータの参照先
                 cmbFavorites.Items.Clear();
                 cmbFavorites.Items.AddRange(favariteList.ToArray());
@@ -305,7 +305,7 @@ namespace WeatherCheckerCSharp
                     return;
                 }
 
-                await _favoriteRepository.SaveFavoritesAsync(favariteList);
+                await _favoriteRepository.SaveJsonSafelyAsync(_favPath, favariteList);
                 cmbFavorites.Items.Clear();
                 cmbFavorites.Items.AddRange(favariteList.ToArray());
                 MessageBox.Show($"お気に入りから{selectedCity}を削除しました");
