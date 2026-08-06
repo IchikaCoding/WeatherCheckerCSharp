@@ -16,6 +16,10 @@ namespace WeatherCheckerCSharp
         // これフィールド。
         // どうしてここでconst ができないの？定数じゃありません！って言われました
         // 👉️プログラムを実行する前から決まっている値のみが `const` で宣言可能
+        // TODO:環境変数の"WEATHER_CHECKER_DATA_ROOT"のパスを取得する
+        // JSON保存したいフォルダ名を作成する
+        // そのフォルダにJSONファイルを作る
+        private string? dataRoot = Environment.GetEnvironmentVariable("WEATHER_CHECKER_DATA_ROOT");
         private static readonly string _favPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
         // Repositoryを保持しておくためのフィールドを作成。
         private readonly FavoriteRepository _favoriteRepository;
