@@ -54,17 +54,33 @@ namespace WeatherCheckerCSharp
         // パスが存在していたら、元のファイルをbackupに入れる。新しいものとファイルごと入れ替える
         // もしパスがあった場合は、パスにファイルを保存する。
         // 失敗した場合は捨てる
-        public async Task SaveJsonSafelyAsync<T>(string path, T value, CancellationToken cancellationToken = default)
+        public async Task SaveJsonSafelyAsync(string path, List<string> favorites)
         {
-            var directory = Path.GetDirectoryName(path);
-            if (!Directory.Exists(directory))
-            {
-                // どうしてディレクトリを作成するの？
-                Directory.CreateDirectory(path);
-            }
-            // tempPathファイルを作成する
-            var tempPath = File.Create(path);
-            FileStream fileStream = new FileStream();
+            // 一時ファイルのパスを作成
+            // オプションつけて、ListをJSONに直す
+            // 一時ファイルのパスを指定して、ファイル保存
+            // それが成功したら、一時ファイルで正式なファイルを上書き
+            string tempPath = path + ".temp";
+            // JSONの出力結果に見やすいインデントや改行（整形印刷）を付けるための設定プロパティ
+            var json = JsonSerializer.Serialize(favorites, new JsonSerializerOptions { WriteIndented = true });
+            // 一時ファイルの保存
+            await File.WriteAllTextAsync(tempPath, json);
+            // tempPathのファイルをpathに移動させる、上書きOK
+            File.Move(tempPath, path, overwrite: true);
+
+            // var directory = Path.GetDirectoryName(path);
+            // if (!Directory.Exists(directory))
+            // {
+            //     // どうしてディレクトリを作成するの？
+            //     // ここ、DirectoryInfoを受け取り忘れました
+            //     // 戻り値は、「return new DirectoryInfo(path, fullPath, isNormalized: true);」
+            //     Directory.CreateDirectory(path);
+            // }
+            // // tempPathファイルを作成する
+            // var tempPath = File.Create(path);
+            // FileStream fileStream = new FileStream();
+            // // 一時ファイルに書き込む
+            // // それが例外なく、問題なく実行できたらそのファイルを正式なファイルにする
 
         }
 
