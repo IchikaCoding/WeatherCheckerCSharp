@@ -54,20 +54,20 @@ namespace WeatherCheckerCSharp
         // パスが存在していたら、元のファイルをbackupに入れる。新しいものとファイルごと入れ替える
         // もしパスがあった場合は、パスにファイルを保存する。
         // 失敗した場合は捨てる
-        public async Task SaveJsonSafelyAsync(string path, List<string> favorites)
+        public async Task SaveJsonSafelyAsync(List<string> favorites)
         {
             // 一時ファイルのパスを作成
             // オプションつけて、ListをJSONに直す
             // 一時ファイルのパスを指定して、ファイル保存
             // それが成功したら、一時ファイルで正式なファイルを上書き
-            string tempPath = path + ".temp";
+            string tempPath = _filePath + ".temp";
             // JSONの出力結果に見やすいインデントや改行（整形印刷）を付けるための設定プロパティ
             var json = JsonSerializer.Serialize(favorites, new JsonSerializerOptions { WriteIndented = true });
             // 一時ファイルの保存
             // WriteAllTextAsyncはいったん中身消してから上書きする処理
             await File.WriteAllTextAsync(tempPath, json);
             // tempPathのファイルをpathに移動させる、上書きOK
-            File.Move(tempPath, path, overwrite: true);
+            File.Move(tempPath, _filePath, overwrite: true);
             // var directory = Path.GetDirectoryName(path);
             // if (!Directory.Exists(directory))
             // {

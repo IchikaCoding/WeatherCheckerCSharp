@@ -31,16 +31,11 @@ namespace WeatherCheckerCSharp
         // Repositoryを保持しておくためのフィールドを作成。
         private readonly FavoriteRepository _favoriteRepository;
         private WeatherApiClient weatherApiClient = new WeatherApiClient();
-        private string _favPath;
+        // readonlyつけわすれ。これは変更しないから
+        private readonly string _favPath;
         public Form1()
         {
             InitializeComponent();
-            // 基準のルートを取得
-            // それがあるか確認
-            // なかったらInvalidOperationExceptionの例外を投げる
-            // あったら、そのルートとMyWeatherのパスを作成
-            // パスからディレクトリを作成
-            // ディレクトリの下にファイルができるようにパスを作成
             string? rootPath = Environment.GetEnvironmentVariable("WEATHER_CHECKER_DATA_ROOT");
             if (string.IsNullOrWhiteSpace(rootPath))
             {
@@ -48,8 +43,10 @@ namespace WeatherCheckerCSharp
                 throw new InvalidOperationException("rootPathが見つかりません");
             }
             string myWeatherPath = Path.Combine(rootPath, "MyWeather");
-            DirectoryInfo dir = Directory.CreateDirectory(myWeatherPath);
-            string favPath = Path.Combine(myWeatherPath, "favarites.json");
+            // ディレクトリ作成が目的なので戻り値のDirectoryInfoをもらわなくてもOK
+            Directory.CreateDirectory(myWeatherPath);
+            string favPath = Path.Combine(myWeatherPath, "favorites.json");
+            // これはどうしてreadonlyなのに代入できるの？👉️コンストラクター内でならOK
             _favPath = favPath;
             _favoriteRepository = new FavoriteRepository(_favPath);
             // 参照先を表示
@@ -255,7 +252,7 @@ namespace WeatherCheckerCSharp
                 // Listに追加したい
                 favariteList.Add(trimmedCityName);
                 // 最新のお気に入りListを登録する
-                await _favoriteRepository.SaveJsonSafelyAsync(_favPath, favariteList);
+                await _favoriteRepository.SaveJsonSafelyAsync(favariteList);
                 // どうしてClear()？👉️クリアしてまた新しいバージョンを登録する。JSONがいつでもデータの参照先
                 cmbFavorites.Items.Clear();
                 cmbFavorites.Items.AddRange(favariteList.ToArray());
@@ -333,7 +330,7 @@ namespace WeatherCheckerCSharp
                     return;
                 }
 
-                await _favoriteRepository.SaveJsonSafelyAsync(_favPath, favariteList);
+                await _favoriteRepository.SaveJsonSafelyAsync(favariteList);
                 cmbFavorites.Items.Clear();
                 cmbFavorites.Items.AddRange(favariteList.ToArray());
                 MessageBox.Show($"お気に入りから{selectedCity}を削除しました");
