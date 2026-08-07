@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using System.IO;
 
 // using System.Globalization;
 // using System.Reflection.Emit;
@@ -19,14 +20,37 @@ namespace WeatherCheckerCSharp
         // TODO:環境変数の"WEATHER_CHECKER_DATA_ROOT"のパスを取得する
         // JSON保存したいフォルダ名を作成する
         // そのフォルダにJSONファイルを作る
-        private string? dataRoot = Environment.GetEnvironmentVariable("WEATHER_CHECKER_DATA_ROOT");
-        private static readonly string _favPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
+        // private static string? dataRoot = Environment.GetEnvironmentVariable("WEATHER_CHECKER_DATA_ROOT");
+        // // TODO: dataRootがnullの可能性がある
+        // private static string? path = Path.Combine(dataRoot, "MyWeather");
+        // private static DirectoryInfo dir = Directory.CreateDirectory(path);
+        // private string jsonPath = Path.Combine(dir);
+        // File.Create(dir);
+
+        // private static readonly string _favPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
         // Repositoryを保持しておくためのフィールドを作成。
         private readonly FavoriteRepository _favoriteRepository;
         private WeatherApiClient weatherApiClient = new WeatherApiClient();
+        private string _favPath;
         public Form1()
         {
             InitializeComponent();
+            // 基準のルートを取得
+            // それがあるか確認
+            // なかったらInvalidOperationExceptionの例外を投げる
+            // あったら、そのルートとMyWeatherのパスを作成
+            // パスからディレクトリを作成
+            // ディレクトリの下にファイルができるようにパスを作成
+            string? rootPath = Environment.GetEnvironmentVariable("WEATHER_CHECKER_DATA_ROOT");
+            if (string.IsNullOrWhiteSpace(rootPath))
+            {
+                // メソッドの呼び出しを許容できない場合の例外
+                throw new InvalidOperationException("rootPathが見つかりません");
+            }
+            string myWeatherPath = Path.Combine(rootPath, "MyWeather");
+            DirectoryInfo dir = Directory.CreateDirectory(myWeatherPath);
+            string favPath = Path.Combine(myWeatherPath, "favarites.json");
+            _favPath = favPath;
             _favoriteRepository = new FavoriteRepository(_favPath);
             // 参照先を表示
             // リンクラベルの表示を書き換える

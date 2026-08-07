@@ -68,7 +68,6 @@ namespace WeatherCheckerCSharp
             await File.WriteAllTextAsync(tempPath, json);
             // tempPathのファイルをpathに移動させる、上書きOK
             File.Move(tempPath, path, overwrite: true);
-
             // var directory = Path.GetDirectoryName(path);
             // if (!Directory.Exists(directory))
             // {
