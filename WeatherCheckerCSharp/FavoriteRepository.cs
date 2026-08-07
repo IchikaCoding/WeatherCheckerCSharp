@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// using System;
+// using System.Collections.Generic;
+// using System.Text;
 using System.Text.Json;
 
 namespace WeatherCheckerCSharp
@@ -20,40 +20,7 @@ namespace WeatherCheckerCSharp
         {
             _filePath = filePath;
         }
-        // // TODO: List<string>はなに？👉️お気に入りの都市がstringで、それのList
-        // public async Task SaveFavoritesAsync(List<string> favs)
-        // {
-        //     // favorites.jsonというディレクトリを作成する（登録処理）
-        //     // TODO: FavPathがnull参照引数になっているらしい。でもFavPathは文字列では？
-        //     // 👉️Yes。Path.GetDirectoryName()の戻り値がstring?。nullの可能性もある
-        //     string? directoryPath = Path.GetDirectoryName(_filePath);
-        //     if (directoryPath is null)
-        //     {
-        //         throw new InvalidOperationException("お気に入りファイルの保存先が正しくありません");
-        //     }
-        //     Directory.CreateDirectory(directoryPath);
-        //     // シリアライズをしてクラスからJSONに戻す
-        //     // { WriteIndented = true}ってオブジェクト初期化子？👉️Yes!!!
-        //     // WriteIndentedをtrueにすると、JSONを作成する時に、見やすいJSONになるらしい。（例：プロパティ名と値の間に空白を追加する。）
-        //     JsonSerializerOptions option = new JsonSerializerOptions { WriteIndented = true };
-        //     // クラスからJSONデータへ変換する、
-        //     string json = JsonSerializer.Serialize(favs, option);
-        //     // パスを指定して非同期でファイルを読む
-        //     // Fileは2種類選べるようになっていて曖昧。これは指定してあげたら治るかも
-        //     // TODO: ここでJSON上書きをしている。FavoriteRepositoryを作る時に一時ファイルに保存したりして修正してみたい
-        //     await System.IO.File.WriteAllTextAsync(_filePath, json);
-        // }
-        // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-        // SaveJsonSafelyAsyncメソッドを作成する
-        // 引数はpath, ジェネリックのvalieをもらってくる。CancellationTokenにdefaultをいれる
-        // pathからディレクトリを作成する
-        // ディレクトリがなかったら作る
-        // tempPathを作る
-        // FileStreamを使ってみる。ファイル読み書きをするために。引数は考える。👉️FileStreamは調べたら引数もわかりそうだよ
-        // streamクラスからJSONに変換する。しかもFlushAsyncっていうものをやるらしい
-        // パスが存在していたら、元のファイルをbackupに入れる。新しいものとファイルごと入れ替える
-        // もしパスがあった場合は、パスにファイルを保存する。
-        // 失敗した場合は捨てる
+
         public async Task SaveJsonSafelyAsync(List<string> favorites)
         {
             // 一時ファイルのパスを作成
@@ -68,20 +35,6 @@ namespace WeatherCheckerCSharp
             await File.WriteAllTextAsync(tempPath, json);
             // tempPathのファイルをpathに移動させる、上書きOK
             File.Move(tempPath, _filePath, overwrite: true);
-            // var directory = Path.GetDirectoryName(path);
-            // if (!Directory.Exists(directory))
-            // {
-            //     // どうしてディレクトリを作成するの？
-            //     // ここ、DirectoryInfoを受け取り忘れました
-            //     // 戻り値は、「return new DirectoryInfo(path, fullPath, isNormalized: true);」
-            //     Directory.CreateDirectory(path);
-            // }
-            // // tempPathファイルを作成する
-            // var tempPath = File.Create(path);
-            // FileStream fileStream = new FileStream();
-            // // 一時ファイルに書き込む
-            // // それが例外なく、問題なく実行できたらそのファイルを正式なファイルにする
-
         }
 
 
@@ -112,8 +65,3 @@ namespace WeatherCheckerCSharp
         }
     }
 }
-
-// Chappy が言ってたやつ
-//- [] パスを文字列で持っておくフィールド
-//- [] これに引数でパスを受け取れるようにしておく
-//- [] Load と Save の処理をここに移動させる

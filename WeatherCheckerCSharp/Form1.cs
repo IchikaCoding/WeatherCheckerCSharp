@@ -1,34 +1,10 @@
 using System.Diagnostics;
 using System.Text.Json;
-using System.IO;
-
-// using System.Globalization;
-// using System.Reflection.Emit;
-// using System.Security.Policy;
-// //using System.IO;
-// using System.Threading.Channels;
-// using WeatherCheckerCSharp;
-// using static System.Net.WebRequestMethods;
 
 namespace WeatherCheckerCSharp
 {
     public partial class Form1 : Form
     {
-        // これフィールド。
-        // どうしてここでconst ができないの？定数じゃありません！って言われました
-        // 👉️プログラムを実行する前から決まっている値のみが `const` で宣言可能
-        // TODO:環境変数の"WEATHER_CHECKER_DATA_ROOT"のパスを取得する
-        // JSON保存したいフォルダ名を作成する
-        // そのフォルダにJSONファイルを作る
-        // private static string? dataRoot = Environment.GetEnvironmentVariable("WEATHER_CHECKER_DATA_ROOT");
-        // // TODO: dataRootがnullの可能性がある
-        // private static string? path = Path.Combine(dataRoot, "MyWeather");
-        // private static DirectoryInfo dir = Directory.CreateDirectory(path);
-        // private string jsonPath = Path.Combine(dir);
-        // File.Create(dir);
-
-        // private static readonly string _favPath = Path.Combine(@"D:\Dev", "MyWeather", "favorites.json");
-        // Repositoryを保持しておくためのフィールドを作成。
         private readonly FavoriteRepository _favoriteRepository;
         private WeatherApiClient weatherApiClient = new WeatherApiClient();
         // readonlyつけわすれ。これは変更しないから
